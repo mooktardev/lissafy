@@ -1,8 +1,17 @@
+import {
+  PlusJakartaSans_400Regular,
+  PlusJakartaSans_500Medium,
+  PlusJakartaSans_600SemiBold,
+  PlusJakartaSans_700Bold,
+  PlusJakartaSans_800ExtraBold,
+  useFonts,
+} from '@expo-google-fonts/plus-jakarta-sans';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useSyncExternalStore } from 'react';
 
+import { Fonts } from '@/constants/theme';
 import { useResolvedScheme, useTheme } from '@/hooks/use-theme';
 import { useStore } from '@/store';
 
@@ -18,14 +27,23 @@ function useHydrated() {
 
 export default function RootLayout() {
   const hydrated = useHydrated();
+  const [fontsLoaded, fontError] = useFonts({
+    PlusJakartaSans_400Regular,
+    PlusJakartaSans_500Medium,
+    PlusJakartaSans_600SemiBold,
+    PlusJakartaSans_700Bold,
+    PlusJakartaSans_800ExtraBold,
+  });
+  // En cas d'échec de chargement, on continue avec la police système.
+  const ready = hydrated && (fontsLoaded || fontError !== null);
   const scheme = useResolvedScheme();
   const theme = useTheme();
 
   useEffect(() => {
-    if (hydrated) SplashScreen.hideAsync();
-  }, [hydrated]);
+    if (ready) SplashScreen.hideAsync();
+  }, [ready]);
 
-  if (!hydrated) return null;
+  if (!ready) return null;
 
   const base = scheme === 'dark' ? DarkTheme : DefaultTheme;
   const navTheme = {
@@ -48,6 +66,8 @@ export default function RootLayout() {
           headerBackButtonDisplayMode: 'minimal',
           headerShadowVisible: false,
           headerStyle: { backgroundColor: theme.background },
+          headerTintColor: theme.primary,
+          headerTitleStyle: { fontFamily: Fonts.bold, fontSize: 17, color: theme.text },
           contentStyle: { backgroundColor: theme.background },
         }}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -61,6 +81,7 @@ export default function RootLayout() {
         <Stack.Screen name="categories" options={{ title: 'Catégories' }} />
         <Stack.Screen name="category" options={{ presentation: 'modal', title: 'Catégorie' }} />
         <Stack.Screen name="settings" options={{ title: 'Réglages' }} />
+        <Stack.Screen name="tools" options={{ title: 'Outils' }} />
       </Stack>
     </ThemeProvider>
   );

@@ -4,13 +4,16 @@ Application mobile de planification financière personnelle, construite avec **E
 
 ## Fonctionnalités
 
-| Onglet | Contenu |
+| Écran | Contenu |
 | --- | --- |
-| **Accueil** | Solde du mois, revenus / dépenses, taux d'épargne, répartition des dépenses (anneau), évolution sur 6 mois, budgets et objectifs les plus importants, dernières transactions |
-| **Transactions** | Saisie des revenus et dépenses (montant, catégorie, date, note), liste groupée par jour, filtre par type, recherche |
-| **Budget** | Plafond mensuel par catégorie, consommé / restant, alertes à 85 % et en cas de dépassement, part des revenus budgétée |
-| **Objectifs** | Objectifs d'épargne avec montant cible et échéance, versements / retraits, effort mensuel calculé automatiquement |
-| **Outils** | Situation nette, simulateur d'épargne (intérêts composés, délai pour atteindre un montant), dettes et prêts (échéancier, paiements, simulation de remboursement anticipé, stratégie avalanche), catégories, réglages |
+| **Accueil** | Carte de solde du mois (revenus, dépenses, taux d'épargne), actions rapides, « reste à dépenser » avec montant par jour, répartition des dépenses, carrousel d'objectifs, évolution sur 6 mois, dernières transactions |
+| **Activité** | Transactions groupées par jour, filtres Dépenses / Revenus, recherche |
+| **＋ (bouton central)** | Ajout rapide d'une transaction depuis n'importe quel onglet |
+| **Budget** | Anneau de suivi global, catégories suivies avec barres de progression, alertes à 85 % et en dépassement, suggestion basée sur le mois précédent |
+| **Objectifs** | Total épargné, objectifs avec anneau de progression, échéance et effort mensuel calculé automatiquement |
+| **Outils** (icône en haut de l'accueil) | Situation nette, simulateur d'épargne (intérêts composés), dettes et prêts (échéancier, paiements, remboursement anticipé, stratégie avalanche), catégories, réglages |
+
+**Design :** police Plus Jakarta Sans, cartes en dégradé, ombres douces, thème clair et sombre soignés.
 
 **Réglages :** devise configurable (EUR, FCFA, MAD, CHF, CAD, USD… ou tout code ISO 4217), thème clair / sombre / système, export et import d'une sauvegarde JSON, remise à zéro.
 

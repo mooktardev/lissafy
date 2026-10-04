@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { Radius, Spacing } from '@/constants/theme';
+import { Fonts, Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import {
   addDays,
@@ -22,21 +22,43 @@ import { Button, CategoryIcon, IconButton, Row, T } from './ui';
 // Sélecteur de mois
 // ---------------------------------------------------------------------------
 
-export function MonthSwitcher({ month, onChange }: { month: MonthKey; onChange: (m: MonthKey) => void }) {
+export function MonthSwitcher({
+  month,
+  onChange,
+  variant = 'card',
+}: {
+  month: MonthKey;
+  onChange: (m: MonthKey) => void;
+  /** `onGradient` : version translucide pour la carte dégradée. */
+  variant?: 'card' | 'onGradient';
+}) {
   const theme = useTheme();
   const isCurrent = month === currentMonth();
+  const onGradient = variant === 'onGradient';
+  const fg = onGradient ? '#FFFFFF' : theme.text;
   return (
-    <Row style={[styles.monthSwitcher, { backgroundColor: theme.card, borderColor: theme.border }]}>
-      <IconButton icon="chevron-back" label="Mois précédent" onPress={() => onChange(addMonths(month, -1))} />
-      <Pressable style={{ flex: 1, alignItems: 'center' }} onPress={() => onChange(currentMonth())}>
-        <T variant="bodyBold">{formatMonth(month)}</T>
-        {!isCurrent ? (
-          <T variant="caption" tone="primary">
-            Revenir au mois en cours
-          </T>
-        ) : null}
-      </Pressable>
-      <IconButton icon="chevron-forward" label="Mois suivant" onPress={() => onChange(addMonths(month, 1))} />
+    <Row gap={Spacing.xs}>
+      <View
+        style={[
+          styles.monthPill,
+          onGradient ? { backgroundColor: 'rgba(255,255,255,0.16)' } : { backgroundColor: theme.card, boxShadow: theme.shadow },
+        ]}>
+        <IconButton icon="chevron-back" label="Mois précédent" size={18} color={fg} onPress={() => onChange(addMonths(month, -1))} />
+        <T variant="bodyBold" style={{ color: fg, minWidth: 116, textAlign: 'center' }}>
+          {formatMonth(month)}
+        </T>
+        <IconButton icon="chevron-forward" label="Mois suivant" size={18} color={fg} onPress={() => onChange(addMonths(month, 1))} />
+      </View>
+      {!isCurrent ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Revenir au mois en cours"
+          hitSlop={8}
+          onPress={() => onChange(currentMonth())}
+          style={[styles.todayPill, { backgroundColor: onGradient ? 'rgba(255,255,255,0.16)' : theme.primarySoft }]}>
+          <Ionicons name="return-down-back" size={16} color={onGradient ? '#FFFFFF' : theme.primary} />
+        </Pressable>
+      ) : null}
     </Row>
   );
 }
@@ -90,7 +112,7 @@ function Calendar({ value, onSelect }: { value: ISODate; onSelect: (d: ISODate) 
                   selected && { backgroundColor: theme.primary },
                   !selected && isToday && { borderWidth: 1, borderColor: theme.primary },
                 ]}>
-                <Text style={{ color: selected ? theme.onPrimary : theme.text, fontWeight: isToday ? '700' : '400' }}>
+                <Text style={{ color: selected ? theme.onPrimary : theme.text, fontFamily: isToday || selected ? Fonts.bold : Fonts.medium }}>
                   {day}
                 </Text>
               </View>
@@ -118,12 +140,12 @@ export function DateField({
 
   return (
     <>
-      <Row style={[styles.dateField, { backgroundColor: theme.card, borderColor: theme.border }]}>
+      <Row style={[styles.dateField, { backgroundColor: theme.card, boxShadow: theme.shadow }]}>
         {value && !allowClear ? (
           <IconButton icon="chevron-back" label="Jour précédent" size={18} onPress={() => onChange(addDays(value, -1))} />
         ) : null}
         <Pressable style={styles.dateLabel} onPress={() => setOpen(true)}>
-          <Ionicons name="calendar-outline" size={18} color={theme.textSecondary} />
+          <Ionicons name="calendar" size={18} color={theme.primary} />
           <T tone={value ? 'default' : 'secondary'}>{value ? formatDate(value) : placeholder}</T>
         </Pressable>
         {value && !allowClear ? (
@@ -176,25 +198,39 @@ export function CategoryGrid({
   onChange: (id: string) => void;
 }) {
   const theme = useTheme();
+  const [width, setWidth] = useState(0);
+  const columns = width >= 520 ? 4 : 3;
+  const cellWidth = width > 0 ? (width - Spacing.sm * (columns - 1)) / columns : undefined;
   return (
-    <View style={styles.wrap}>
+    <View style={styles.wrap} onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
       {categories.map((c) => {
         const selected = c.id === value;
         return (
           <Pressable
             key={c.id}
             onPress={() => onChange(c.id)}
-            style={[
+            style={({ pressed }) => [
               styles.categoryCell,
+              cellWidth ? { width: cellWidth } : null,
               {
-                borderColor: selected ? c.color : theme.border,
-                backgroundColor: selected ? `${c.color}18` : theme.card,
+                borderColor: selected ? c.color : 'transparent',
+                backgroundColor: selected ? `${c.color}14` : theme.card,
+                boxShadow: selected ? 'none' : theme.shadow,
               },
+              pressed && { opacity: 0.7 },
             ]}>
-            <CategoryIcon icon={c.icon} color={c.color} size={34} />
-            <T variant="caption" numberOfLines={1} style={{ textAlign: 'center' }}>
+            <CategoryIcon icon={c.icon} color={c.color} size={40} />
+            <T
+              variant="caption"
+              numberOfLines={1}
+              style={{ textAlign: 'center', fontFamily: selected ? Fonts.bold : Fonts.medium, color: selected ? c.color : theme.text }}>
               {c.name}
             </T>
+            {selected ? (
+              <View style={[styles.check, { backgroundColor: c.color }]}>
+                <Ionicons name="checkmark" size={12} color="#FFFFFF" />
+              </View>
+            ) : null}
           </Pressable>
         );
       })}
@@ -215,7 +251,7 @@ export function IconPicker({ icons, value, color, onChange }: { icons: IconName[
             onPress={() => onChange(icon)}
             style={[
               styles.iconCell,
-              { borderColor: selected ? color : theme.border, backgroundColor: selected ? `${color}22` : theme.card },
+              { borderColor: selected ? color : 'transparent', backgroundColor: selected ? `${color}1F` : theme.card },
             ]}>
             <Ionicons name={icon} size={22} color={selected ? color : theme.textSecondary} />
           </Pressable>
@@ -243,14 +279,15 @@ export function ColorPicker({ colors, value, onChange }: { colors: string[]; val
 }
 
 const styles = StyleSheet.create({
-  monthSwitcher: {
-    borderRadius: Radius.lg,
-    borderWidth: StyleSheet.hairlineWidth,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: Spacing.sm,
+  monthPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: Radius.pill,
+    paddingHorizontal: Spacing.xs,
+    paddingVertical: 4,
   },
+  todayPill: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
   dateField: {
-    borderWidth: 1,
     borderRadius: Radius.md,
     paddingHorizontal: Spacing.sm,
     minHeight: 46,
@@ -266,11 +303,21 @@ const styles = StyleSheet.create({
     width: '31%',
     alignItems: 'center',
     gap: Spacing.xs,
-    paddingVertical: Spacing.sm,
+    paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.xs,
     borderRadius: Radius.md,
-    borderWidth: 1.5,
+    borderWidth: 2,
   },
-  iconCell: { width: 46, height: 46, borderRadius: Radius.md, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' },
+  check: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconCell: { width: 48, height: 48, borderRadius: Radius.md, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
   colorCell: { width: 38, height: 38, borderRadius: 19, borderWidth: 3, alignItems: 'center', justifyContent: 'center' },
 });

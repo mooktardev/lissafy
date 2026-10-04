@@ -1,43 +1,58 @@
 export const Colors = {
   light: {
-    background: '#F4F5F9',
+    background: '#F5F6FA',
     card: '#FFFFFF',
-    cardMuted: '#EEF0F5',
-    border: '#E2E5EC',
-    text: '#0F172A',
-    textSecondary: '#64748B',
-    primary: '#4F46E5',
-    primarySoft: '#E0E7FF',
+    cardMuted: '#EEF0F6',
+    border: '#E6E8F0',
+    text: '#111428',
+    textSecondary: '#6B7190',
+    primary: '#5B4CF0',
+    primarySoft: '#ECEAFE',
     onPrimary: '#FFFFFF',
-    income: '#059669',
-    incomeSoft: '#D1FAE5',
-    expense: '#DC2626',
-    expenseSoft: '#FEE2E2',
-    warning: '#D97706',
-    warningSoft: '#FEF3C7',
-    overlay: 'rgba(15, 23, 42, 0.45)',
+    income: '#0E9F6E',
+    incomeSoft: '#DDF6EC',
+    expense: '#E5484D',
+    expenseSoft: '#FDE8E8',
+    warning: '#D9822B',
+    warningSoft: '#FDF0DF',
+    overlay: 'rgba(17, 20, 40, 0.45)',
+    shadow: '0px 6px 20px rgba(32, 36, 80, 0.07)',
+    tabBar: '#FFFFFF',
   },
   dark: {
-    background: '#0B0F19',
-    card: '#151B2B',
-    cardMuted: '#1E2638',
-    border: '#273049',
-    text: '#F1F5F9',
-    textSecondary: '#94A3B8',
-    primary: '#818CF8',
-    primarySoft: '#272C5A',
-    onPrimary: '#0B0F19',
-    income: '#34D399',
-    incomeSoft: '#0F3B2E',
-    expense: '#F87171',
-    expenseSoft: '#45191C',
-    warning: '#FBBF24',
-    warningSoft: '#3D2E0A',
+    background: '#0B0D17',
+    card: '#151827',
+    cardMuted: '#1F2336',
+    border: '#262A40',
+    text: '#F2F3FA',
+    textSecondary: '#9196B3',
+    primary: '#8C80FF',
+    primarySoft: '#26224F',
+    onPrimary: '#FFFFFF',
+    income: '#3DD598',
+    incomeSoft: '#123327',
+    expense: '#FF6B70',
+    expenseSoft: '#3B1A1D',
+    warning: '#F5A54A',
+    warningSoft: '#3A2812',
     overlay: 'rgba(0, 0, 0, 0.6)',
+    shadow: '0px 6px 20px rgba(0, 0, 0, 0.35)',
+    tabBar: '#131625',
   },
 } as const;
 
 export type ThemeColors = { [K in keyof typeof Colors.light]: string };
+
+/** Dégradé de la carte principale (identique en clair et sombre). */
+export const HeroGradient = ['#7B5CFA', '#5B4CF0', '#3F3BD1'] as const;
+
+export const Fonts = {
+  regular: 'PlusJakartaSans_400Regular',
+  medium: 'PlusJakartaSans_500Medium',
+  semibold: 'PlusJakartaSans_600SemiBold',
+  bold: 'PlusJakartaSans_700Bold',
+  extrabold: 'PlusJakartaSans_800ExtraBold',
+} as const;
 
 export const Spacing = {
   xs: 4,
@@ -49,9 +64,10 @@ export const Spacing = {
 } as const;
 
 export const Radius = {
-  sm: 8,
-  md: 12,
-  lg: 18,
+  sm: 10,
+  md: 14,
+  lg: 22,
+  xl: 28,
   pill: 999,
 } as const;
 

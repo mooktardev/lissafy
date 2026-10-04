@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { View, type LayoutChangeEvent } from 'react-native';
 import Svg, { Circle, G, Line, Path, Rect, Text as SvgText } from 'react-native-svg';
 
+import { Fonts } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 function useWidth(initial = 300) {
@@ -92,7 +93,8 @@ export function BarChart({
   return (
     <View onLayout={onLayout}>
       <Svg width={width} height={height}>
-        <SvgText x={0} y={10} fontSize={10} fill={theme.textSecondary}>
+        <SvgText x={0} y={10} fontSize={10}
+              fontFamily={Fonts.medium} fill={theme.textSecondary}>
           {formatValue(max)}
         </SvgText>
         <Line x1={0} x2={width} y1={topPad} y2={topPad} stroke={theme.border} strokeDasharray="3 4" />
@@ -119,6 +121,7 @@ export function BarChart({
                 x={gi * groupW + groupW / 2}
                 y={height - 4}
                 fontSize={11}
+              fontFamily={Fonts.medium}
                 fill={theme.textSecondary}
                 textAnchor="middle">
                 {d.label}
@@ -160,7 +163,8 @@ export function LineChart({
   return (
     <View onLayout={onLayout}>
       <Svg width={width} height={height}>
-        <SvgText x={0} y={11} fontSize={10} fill={theme.textSecondary}>
+        <SvgText x={0} y={11} fontSize={10}
+              fontFamily={Fonts.medium} fill={theme.textSecondary}>
           {formatValue(max)}
         </SvgText>
         {[0, 0.5, 1].map((f) => (
@@ -192,6 +196,7 @@ export function LineChart({
               x={x(i)}
               y={height - 4}
               fontSize={10}
+              fontFamily={Fonts.medium}
               fill={theme.textSecondary}
               textAnchor={i === 0 ? 'start' : i === labels.length - 1 ? 'end' : 'middle'}>
               {l}

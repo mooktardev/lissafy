@@ -2,13 +2,15 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, type Href } from 'expo-router';
 import { View } from 'react-native';
 
-import { Card, CategoryIcon, Row, Screen, SectionHeader, StatTile, T } from '@/components/ui';
+import { Card, CategoryIcon, GradientCard, Row, Screen, SectionHeader, StatTile, T } from '@/components/ui';
 import { Spacing } from '@/constants/theme';
 import { useCurrency, useTheme } from '@/hooks/use-theme';
 import { debtBalance, goalSaved } from '@/lib/finance';
 import { formatMoney } from '@/lib/format';
 import type { IconName } from '@/lib/types';
 import { useStore } from '@/store';
+
+const NET_GRADIENT = ['#2A2F55', '#1A1D38', '#111428'] as const;
 
 function ToolCard({ icon, color, title, subtitle, href }: { icon: IconName; color: string; title: string; subtitle: string; href: Href }) {
   const theme = useTheme();
@@ -40,18 +42,18 @@ export default function Tools() {
 
   return (
     <Screen>
+      <GradientCard colors={NET_GRADIENT} style={{ gap: Spacing.xs, boxShadow: '0px 14px 32px rgba(17, 20, 40, 0.3)' }}>
+        <T variant="caption" tone="inverse" style={{ opacity: 0.8 }}>
+          Situation nette (épargne − dettes)
+        </T>
+        <T variant="hero" style={{ color: net < 0 ? '#FFB4B6' : '#7CF5C4' }} numberOfLines={1} adjustsFontSizeToFit>
+          {formatMoney(net, currency, { sign: true })}
+        </T>
+      </GradientCard>
       <Row gap={Spacing.md}>
         <StatTile label="Épargne" value={formatMoney(savings, currency)} tone="income" icon="wallet" />
         <StatTile label="Dettes" value={formatMoney(totalDebt, currency)} tone="expense" icon="card" />
       </Row>
-      <Card style={{ gap: Spacing.xs }}>
-        <T variant="caption" tone="secondary">
-          Situation nette (épargne − dettes)
-        </T>
-        <T variant="amountLarge" tone={net < 0 ? 'expense' : 'income'}>
-          {formatMoney(net, currency, { sign: true })}
-        </T>
-      </Card>
 
       <SectionHeader title="Planification" />
       <ToolCard
