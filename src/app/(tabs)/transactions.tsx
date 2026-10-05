@@ -101,7 +101,7 @@ export default function Transactions() {
               <Card style={{ paddingVertical: Spacing.xs }}>
                 {g.items.map((t, i) => (
                   <View key={t.id}>
-                    {i > 0 ? <Divider inset={58} /> : null}
+                    {i > 0 ? <Divider inset={50} /> : null}
                     <TransactionRow transaction={t} category={catById.get(t.categoryId)} />
                   </View>
                 ))}

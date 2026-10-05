@@ -1,5 +1,5 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useId, type ReactNode } from 'react';
+import { useId, useState, type ReactNode } from 'react';
 import {
   Alert,
   Platform,
@@ -48,31 +48,34 @@ export function Screen({
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   return (
-    <ScrollView
-      style={{ flex: 1, backgroundColor: theme.background }}
-      contentContainerStyle={[
-        styles.screenContent,
-        title ? { paddingTop: insets.top + Spacing.md } : null,
-        contentStyle,
-      ]}
-      keyboardShouldPersistTaps="handled"
-      showsVerticalScrollIndicator={false}
-      {...rest}>
+    <View style={{ flex: 1, backgroundColor: theme.background }}>
       {title ? (
-        <Row style={{ marginBottom: Spacing.xs }}>
-          <View style={{ flex: 1 }}>
-            {subtitle ? (
-              <T variant="caption" tone="secondary">
-                {subtitle}
+        // En-tête fixe et opaque : couvre aussi la barre d'état, le contenu défile dessous.
+        <View style={[styles.header, { paddingTop: insets.top + Spacing.sm, backgroundColor: theme.background }]}>
+          <Row style={styles.headerInner}>
+            <View style={{ flex: 1 }}>
+              {subtitle ? (
+                <T variant="caption" tone="secondary">
+                  {subtitle}
+                </T>
+              ) : null}
+              <T variant="title" numberOfLines={1}>
+                {title}
               </T>
-            ) : null}
-            <T variant="title">{title}</T>
-          </View>
-          {right}
-        </Row>
+            </View>
+            {right}
+          </Row>
+        </View>
       ) : null}
-      {children}
-    </ScrollView>
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={[styles.screenContent, title ? { paddingTop: Spacing.sm } : null, contentStyle]}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        {...rest}>
+        {children}
+      </ScrollView>
+    </View>
   );
 }
 
@@ -107,23 +110,37 @@ export function GradientCard({
   style?: StyleProp<ViewStyle>;
   colors?: readonly string[];
 }) {
-  const id = useId().replace(/:/g, '');
+  const id = useId().replace(/[^a-zA-Z0-9]/g, '');
+  const [size, setSize] = useState({ width: 0, height: 0 });
+  const flat = StyleSheet.flatten(style) ?? {};
+  const { gap, padding, boxShadow, ...outer } = flat;
   return (
-    <View style={[styles.gradientCard, style]}>
-      <Svg style={StyleSheet.absoluteFill} width="100%" height="100%" preserveAspectRatio="none">
-        <Defs>
-          <LinearGradient id={`g${id}`} x1="0" y1="0" x2="1" y2="1">
-            {colors.map((c, i) => (
-              <Stop key={c + i} offset={i / Math.max(1, colors.length - 1)} stopColor={c} />
-            ))}
-          </LinearGradient>
-        </Defs>
-        <Rect width="100%" height="100%" fill={`url(#g${id})`} />
-        {/* Halos décoratifs */}
-        <Circle cx="92%" cy="8%" r="90" fill="#FFFFFF" opacity={0.08} />
-        <Circle cx="78%" cy="105%" r="70" fill="#FFFFFF" opacity={0.06} />
-      </Svg>
-      {children}
+    // Ombre sur le conteneur externe, découpage (coins arrondis) sur le conteneur interne :
+    // les combiner sur la même vue rend mal sur Android.
+    <View style={[styles.gradientShadow, { backgroundColor: colors[colors.length - 1] }, boxShadow ? { boxShadow } : null, outer]}>
+      <View
+        style={[styles.gradientInner, { gap, padding: padding ?? 20 }]}
+        onLayout={(e) => {
+          const { width, height } = e.nativeEvent.layout;
+          if (width !== size.width || height !== size.height) setSize({ width, height });
+        }}>
+        {size.width > 0 ? (
+          <Svg style={StyleSheet.absoluteFill} width={size.width} height={size.height}>
+            <Defs>
+              <LinearGradient id={`g${id}`} x1="0" y1="0" x2={size.width} y2={size.height} gradientUnits="userSpaceOnUse">
+                {colors.map((c, i) => (
+                  <Stop key={c + i} offset={i / Math.max(1, colors.length - 1)} stopColor={c} />
+                ))}
+              </LinearGradient>
+            </Defs>
+            <Rect x={0} y={0} width={size.width} height={size.height} fill={`url(#g${id})`} />
+            {/* Halos décoratifs */}
+            <Circle cx={size.width * 0.92} cy={size.height * 0.08} r={80} fill="#FFFFFF" opacity={0.07} />
+            <Circle cx={size.width * 0.78} cy={size.height * 1.05} r={60} fill="#FFFFFF" opacity={0.05} />
+          </Svg>
+        ) : null}
+        {children}
+      </View>
     </View>
   );
 }
@@ -168,15 +185,15 @@ export function T({
 }
 
 export const textStyles = StyleSheet.create<Record<Variant, TextStyle>>({
-  title: { fontFamily: Fonts.extrabold, fontSize: 28, letterSpacing: -0.6, lineHeight: 34 },
-  heading: { fontFamily: Fonts.bold, fontSize: 17, letterSpacing: -0.2 },
-  body: { fontFamily: Fonts.medium, fontSize: 15 },
-  bodyBold: { fontFamily: Fonts.semibold, fontSize: 15 },
-  caption: { fontFamily: Fonts.medium, fontSize: 13 },
-  label: { fontFamily: Fonts.semibold, fontSize: 12, letterSpacing: 0.4, textTransform: 'uppercase' },
-  amount: { fontFamily: Fonts.bold, fontSize: 16, fontVariant: ['tabular-nums'] },
-  amountLarge: { fontFamily: Fonts.extrabold, fontSize: 30, letterSpacing: -0.8, fontVariant: ['tabular-nums'] },
-  hero: { fontFamily: Fonts.extrabold, fontSize: 38, letterSpacing: -1.2, fontVariant: ['tabular-nums'] },
+  title: { fontFamily: Fonts.extrabold, fontSize: 22, letterSpacing: -0.4, lineHeight: 28 },
+  heading: { fontFamily: Fonts.bold, fontSize: 15, letterSpacing: -0.1 },
+  body: { fontFamily: Fonts.medium, fontSize: 14 },
+  bodyBold: { fontFamily: Fonts.semibold, fontSize: 14 },
+  caption: { fontFamily: Fonts.medium, fontSize: 12 },
+  label: { fontFamily: Fonts.semibold, fontSize: 11, letterSpacing: 0.4, textTransform: 'uppercase' },
+  amount: { fontFamily: Fonts.bold, fontSize: 14, fontVariant: ['tabular-nums'] },
+  amountLarge: { fontFamily: Fonts.extrabold, fontSize: 22, letterSpacing: -0.5, fontVariant: ['tabular-nums'] },
+  hero: { fontFamily: Fonts.extrabold, fontSize: 28, letterSpacing: -0.8, fontVariant: ['tabular-nums'] },
 });
 
 export function SectionHeader({ title, action, onAction }: { title: string; action?: string; onAction?: () => void }) {
@@ -244,12 +261,12 @@ export function Button({
       style={({ pressed }) => [
         styles.button,
         { backgroundColor: bg },
-        variant === 'primary' && !disabled && { boxShadow: `0px 8px 20px ${theme.primary}40` },
+        variant === 'primary' && !disabled && { boxShadow: `0px 2px 6px ${theme.primary}33` },
         pressed && styles.pressedScale,
         disabled && { opacity: 0.4 },
         style,
       ]}>
-      {icon ? <Ionicons name={icon} size={19} color={fg} /> : null}
+      {icon ? <Ionicons name={icon} size={17} color={fg} /> : null}
       <Text style={[styles.buttonText, { color: fg }]}>{title}</Text>
     </Pressable>
   );
@@ -296,7 +313,7 @@ export function Fab({ onPress, label }: { onPress: () => void; label: string }) 
       onPress={onPress}
       style={({ pressed }) => [
         styles.fab,
-        { backgroundColor: theme.primary, boxShadow: `0px 10px 24px ${theme.primary}66` },
+        { backgroundColor: theme.primary, boxShadow: `0px 3px 8px ${theme.primary}4D` },
         pressed && styles.pressedScale,
       ]}>
       <Ionicons name="add" size={30} color={theme.onPrimary} />
@@ -323,7 +340,7 @@ export function QuickAction({
       onPress={onPress}
       style={({ pressed }) => [styles.quickAction, pressed && styles.pressedScale]}>
       <View style={[styles.quickIcon, { backgroundColor: `${color}1F` }]}>
-        <Ionicons name={icon} size={24} color={color} />
+        <Ionicons name={icon} size={20} color={color} />
       </View>
       <T variant="caption" numberOfLines={1} style={{ fontFamily: Fonts.semibold }}>
         {label}
@@ -357,7 +374,7 @@ export function Chip({
           : { backgroundColor: theme.card, boxShadow: theme.shadow },
         pressed && { opacity: 0.7 },
       ]}>
-      {icon ? <Ionicons name={icon} size={16} color={selected ? '#FFFFFF' : active} /> : null}
+      {icon ? <Ionicons name={icon} size={14} color={selected ? '#FFFFFF' : active} /> : null}
       <Text style={[styles.chipText, { color: selected ? '#FFFFFF' : theme.text }]}>{label}</Text>
     </Pressable>
   );
@@ -385,7 +402,7 @@ export function Segmented<V extends string>({
             accessibilityState={{ selected }}
             onPress={() => onChange(o.value)}
             style={[styles.segment, selected && { backgroundColor: theme.card, boxShadow: theme.shadow }]}>
-            {o.icon ? <Ionicons name={o.icon} size={16} color={fg} /> : null}
+            {o.icon ? <Ionicons name={o.icon} size={14} color={fg} /> : null}
             <Text style={[styles.segmentText, { color: fg }]}>{o.label}</Text>
           </Pressable>
         );
@@ -418,7 +435,7 @@ export function Input({ style, suffix, icon, ...rest }: TextInputProps & { suffi
   const theme = useTheme();
   return (
     <View style={[styles.input, { backgroundColor: theme.card, boxShadow: theme.shadow }]}>
-      {icon ? <Ionicons name={icon} size={18} color={theme.textSecondary} /> : null}
+      {icon ? <Ionicons name={icon} size={16} color={theme.textSecondary} /> : null}
       <TextInput
         placeholderTextColor={theme.textSecondary}
         style={[styles.inputText, { color: theme.text }, Platform.OS === 'web' && webNoOutline, style]}
@@ -441,13 +458,13 @@ export function AmountInput(props: Omit<TextInputProps, 'keyboardType'> & { suff
 // Affichage
 // ---------------------------------------------------------------------------
 
-export function CategoryIcon({ icon, color, size = 42 }: { icon: IconName; color: string; size?: number }) {
+export function CategoryIcon({ icon, color, size = 38 }: { icon: IconName; color: string; size?: number }) {
   return (
     <View
       style={{
         width: size,
         height: size,
-        borderRadius: size * 0.34,
+        borderRadius: size * 0.3,
         backgroundColor: `${color}1F`,
         alignItems: 'center',
         justifyContent: 'center',
@@ -524,7 +541,7 @@ export function EmptyState({
   return (
     <View style={styles.empty}>
       <View style={[styles.emptyIcon, { backgroundColor: theme.primarySoft }]}>
-        <Ionicons name={icon} size={32} color={theme.primary} />
+        <Ionicons name={icon} size={26} color={theme.primary} />
       </View>
       <T variant="heading" style={{ textAlign: 'center' }}>
         {title}
@@ -554,17 +571,17 @@ export function StatTile({
   const iconColor =
     tone === 'income' ? theme.income : tone === 'expense' ? theme.expense : tone === 'warning' ? theme.warning : theme.primary;
   return (
-    <Card style={{ flex: 1, gap: Spacing.sm, padding: Spacing.lg }}>
+    <Card style={{ flex: 1, gap: Spacing.sm, padding: Spacing.md }}>
       {icon ? (
         <View style={[styles.statIcon, { backgroundColor: `${iconColor}1F` }]}>
-          <Ionicons name={icon} size={16} color={iconColor} />
+          <Ionicons name={icon} size={14} color={iconColor} />
         </View>
       ) : null}
       <View style={{ gap: 2 }}>
         <T variant="caption" tone="secondary" numberOfLines={1}>
           {label}
         </T>
-        <T variant="amount" tone={tone} numberOfLines={1} adjustsFontSizeToFit style={{ fontSize: 17 }}>
+        <T variant="amount" tone={tone} numberOfLines={1} adjustsFontSizeToFit style={{ fontSize: 15 }}>
           {value}
         </T>
       </View>
@@ -606,10 +623,18 @@ export function notify(title: string, message: string) {
 const webNoOutline = { outlineStyle: 'none' } as unknown as TextStyle;
 
 const styles = StyleSheet.create({
+  header: { zIndex: 1 },
+  headerInner: {
+    paddingHorizontal: Spacing.lg,
+    paddingBottom: Spacing.sm,
+    width: '100%',
+    maxWidth: MaxContentWidth,
+    alignSelf: 'center',
+  },
   screenContent: {
     padding: Spacing.lg,
-    paddingBottom: 130,
-    gap: Spacing.lg,
+    paddingBottom: 120,
+    gap: Spacing.md,
     width: '100%',
     maxWidth: MaxContentWidth,
     alignSelf: 'center',
@@ -618,11 +643,13 @@ const styles = StyleSheet.create({
     borderRadius: Radius.lg,
     padding: Spacing.lg,
   },
-  gradientCard: {
+  gradientShadow: {
     borderRadius: Radius.xl,
-    padding: Spacing.xl,
+    boxShadow: '0px 4px 12px rgba(76, 60, 230, 0.22)',
+  },
+  gradientInner: {
+    borderRadius: Radius.xl,
     overflow: 'hidden',
-    boxShadow: '0px 14px 32px rgba(76, 60, 230, 0.35)',
   },
   pressedScale: { opacity: 0.85, transform: [{ scale: 0.98 }] },
   sectionHeader: { marginTop: Spacing.sm, marginBottom: -Spacing.xs },
@@ -631,62 +658,62 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: Spacing.sm,
-    paddingVertical: 15,
+    paddingVertical: 13,
     paddingHorizontal: Spacing.lg,
     borderRadius: Radius.md,
   },
-  buttonText: { fontFamily: Fonts.bold, fontSize: 16 },
+  buttonText: { fontFamily: Fonts.bold, fontSize: 15 },
   iconButton: { padding: Spacing.xs },
-  iconButtonFilled: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
+  iconButtonFilled: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   fab: {
     position: 'absolute',
     right: Spacing.xl,
     bottom: Spacing.xl,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 54,
+    height: 54,
+    borderRadius: 27,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  quickAction: { flex: 1, alignItems: 'center', gap: Spacing.sm },
-  quickIcon: { width: 58, height: 58, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+  quickAction: { flex: 1, alignItems: 'center', gap: 6 },
+  quickIcon: { width: 48, height: 48, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    paddingVertical: 9,
-    paddingHorizontal: 15,
+    gap: 5,
+    paddingVertical: 7,
+    paddingHorizontal: 13,
     borderRadius: Radius.pill,
   },
-  chipText: { fontFamily: Fonts.semibold, fontSize: 14 },
-  segmented: { flexDirection: 'row', borderRadius: Radius.md, padding: 4 },
+  chipText: { fontFamily: Fonts.semibold, fontSize: 13 },
+  segmented: { flexDirection: 'row', borderRadius: Radius.md, padding: 3 },
   segment: {
     flex: 1,
     flexDirection: 'row',
-    gap: 6,
-    paddingVertical: 10,
+    gap: 5,
+    paddingVertical: 8,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: Radius.sm,
   },
-  segmentText: { fontFamily: Fonts.bold, fontSize: 14 },
+  segmentText: { fontFamily: Fonts.bold, fontSize: 13 },
   field: { gap: Spacing.sm },
   input: {
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: Radius.md,
-    paddingHorizontal: Spacing.lg,
+    paddingHorizontal: Spacing.md,
     gap: Spacing.sm,
   },
-  inputText: { flex: 1, fontFamily: Fonts.medium, fontSize: 16, paddingVertical: 14, minHeight: 50 },
+  inputText: { flex: 1, fontFamily: Fonts.medium, fontSize: 15, paddingVertical: 12, minHeight: 46 },
   empty: { alignItems: 'center', gap: Spacing.sm, paddingVertical: Spacing.xl, paddingHorizontal: Spacing.md },
   emptyIcon: {
-    width: 72,
-    height: 72,
-    borderRadius: 26,
+    width: 60,
+    height: 60,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: Spacing.xs,
   },
-  statIcon: { width: 30, height: 30, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
+  statIcon: { width: 26, height: 26, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
 });

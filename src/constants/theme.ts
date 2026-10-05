@@ -16,7 +16,7 @@ export const Colors = {
     warning: '#D9822B',
     warningSoft: '#FDF0DF',
     overlay: 'rgba(17, 20, 40, 0.45)',
-    shadow: '0px 6px 20px rgba(32, 36, 80, 0.07)',
+    shadow: '0px 1px 3px rgba(32, 36, 80, 0.06)',
     tabBar: '#FFFFFF',
   },
   dark: {
@@ -36,7 +36,7 @@ export const Colors = {
     warning: '#F5A54A',
     warningSoft: '#3A2812',
     overlay: 'rgba(0, 0, 0, 0.6)',
-    shadow: '0px 6px 20px rgba(0, 0, 0, 0.35)',
+    shadow: '0px 1px 3px rgba(0, 0, 0, 0.3)',
     tabBar: '#131625',
   },
 } as const;
@@ -64,10 +64,10 @@ export const Spacing = {
 } as const;
 
 export const Radius = {
-  sm: 10,
-  md: 14,
-  lg: 22,
-  xl: 28,
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 20,
   pill: 999,
 } as const;
 

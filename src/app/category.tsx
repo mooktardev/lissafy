@@ -52,7 +52,7 @@ export default function CategoryEdit() {
     <Screen>
       <Stack.Screen options={{ title: existing ? 'Modifier la catégorie' : 'Nouvelle catégorie' }} />
       <Row gap={Spacing.md} style={{ justifyContent: 'center' }}>
-        <CategoryIcon icon={icon} color={color} size={64} />
+        <CategoryIcon icon={icon} color={color} size={56} />
       </Row>
       {!existing ? (
         <Segmented<TransactionKind>

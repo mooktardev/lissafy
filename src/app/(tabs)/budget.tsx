@@ -77,17 +77,17 @@ export default function BudgetScreen() {
 
   return (
     <Screen title="Budget" right={<MonthSwitcher month={month} onChange={setMonth} />}>
-      <Card style={{ gap: Spacing.lg }}>
+      <Card style={{ gap: Spacing.md }}>
         <Row gap={Spacing.lg}>
           <ProgressRing
             ratio={ratioAll}
-            size={118}
-            thickness={12}
+            size={100}
+            thickness={10}
             color={left < 0 ? theme.expense : ratioAll > 0.85 ? theme.warning : theme.primary}>
             <T variant="caption" tone="secondary">
               {left >= 0 ? 'Reste' : 'Dépassé'}
             </T>
-            <T variant="bodyBold" style={{ fontFamily: Fonts.extrabold, fontSize: 16 }} tone={left < 0 ? 'expense' : 'default'}>
+            <T variant="bodyBold" style={{ fontFamily: Fonts.extrabold, fontSize: 14 }} tone={left < 0 ? 'expense' : 'default'}>
               {formatMoney(Math.abs(left), currency, { compact: Math.abs(left) >= 10000 })}
             </T>
           </ProgressRing>
@@ -96,7 +96,7 @@ export default function BudgetScreen() {
               <T variant="caption" tone="secondary">
                 Budget du mois
               </T>
-              <T variant="amountLarge" style={{ fontSize: 24 }} numberOfLines={1} adjustsFontSizeToFit>
+              <T variant="amountLarge" style={{ fontSize: 20 }} numberOfLines={1} adjustsFontSizeToFit>
                 {money(totalBudget)}
               </T>
             </View>
@@ -171,7 +171,7 @@ export default function BudgetScreen() {
                 </T>
               </View>
             </Row>
-            <ProgressBar ratio={ratio} color={color} height={10} />
+            <ProgressBar ratio={ratio} color={color} height={6} />
           </Card>
         );
       })}
@@ -183,9 +183,9 @@ export default function BudgetScreen() {
             const s = spent.get(c.id) ?? 0;
             return (
               <View key={c.id}>
-                {i > 0 ? <Divider inset={56} /> : null}
+                {i > 0 ? <Divider inset={48} /> : null}
                 <Pressable onPress={() => openEditor(c)} style={({ pressed }) => [styles.row, pressed && { opacity: 0.6 }]}>
-                  <CategoryIcon icon={c.icon} color={c.color} size={40} />
+                  <CategoryIcon icon={c.icon} color={c.color} size={36} />
                   <View style={{ flex: 1 }}>
                     <T variant="bodyBold" numberOfLines={1}>
                       {c.name}

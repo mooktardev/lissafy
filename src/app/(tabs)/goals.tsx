@@ -36,6 +36,7 @@ function GoalCard({ goal }: { goal: Goal }) {
   const late = goal.deadline !== null && goal.deadline < today() && !done;
 
   return (
+<<<<<<< HEAD
     <Card
       onPress={() =>
         router.push({ pathname: "/goal/[id]", params: { id: goal.id } })
@@ -54,6 +55,12 @@ function GoalCard({ goal }: { goal: Goal }) {
             size={24}
             color={goal.color}
           />
+=======
+    <Card onPress={() => router.push({ pathname: '/goal/[id]', params: { id: goal.id } })} style={{ gap: Spacing.md }}>
+      <Row gap={Spacing.md}>
+        <ProgressRing ratio={progress} color={goal.color} size={52} thickness={5}>
+          <Ionicons name={done ? 'checkmark' : goal.icon} size={20} color={goal.color} />
+>>>>>>> e6cf9706e9e0f5893dd474a69ab2f09cf3f2b5df
         </ProgressRing>
         <View style={{ flex: 1, gap: 2 }}>
           <T variant="heading" numberOfLines={1}>
@@ -80,7 +87,7 @@ function GoalCard({ goal }: { goal: Goal }) {
         </T>
       </Row>
       <View style={{ gap: Spacing.sm }}>
-        <ProgressBar ratio={progress} color={goal.color} height={8} />
+        <ProgressBar ratio={progress} color={goal.color} height={6} />
         <Row>
           <T variant="caption" tone="secondary" style={{ flex: 1 }}>
             <T variant="caption" style={{ fontFamily: Fonts.bold }}>
@@ -90,15 +97,20 @@ function GoalCard({ goal }: { goal: Goal }) {
           </T>
           {done ? (
             <View style={[styles.badge, { backgroundColor: theme.incomeSoft }]}>
+<<<<<<< HEAD
               <T
                 variant="caption"
                 tone="income"
                 style={{ fontFamily: Fonts.bold, fontSize: 12 }}
               >
+=======
+              <T variant="caption" tone="income" style={{ fontFamily: Fonts.bold, fontSize: 11 }}>
+>>>>>>> e6cf9706e9e0f5893dd474a69ab2f09cf3f2b5df
                 Atteint 🎉
               </T>
             </View>
           ) : needed ? (
+<<<<<<< HEAD
             <View
               style={[styles.badge, { backgroundColor: `${goal.color}1A` }]}
             >
@@ -110,6 +122,10 @@ function GoalCard({ goal }: { goal: Goal }) {
                   fontSize: 12,
                 }}
               >
+=======
+            <View style={[styles.badge, { backgroundColor: `${goal.color}1A` }]}>
+              <T variant="caption" style={{ color: goal.color, fontFamily: Fonts.bold, fontSize: 11 }}>
+>>>>>>> e6cf9706e9e0f5893dd474a69ab2f09cf3f2b5df
                 {formatMoney(needed, currency)} / mois
               </T>
             </View>
@@ -136,6 +152,7 @@ export default function Goals() {
   return (
     <Screen
       title="Objectifs"
+<<<<<<< HEAD
       right={
         <IconButton
           icon="add"
@@ -145,6 +162,9 @@ export default function Goals() {
         />
       }
     >
+=======
+      right={<IconButton icon="add" label="Nouvel objectif" filled size={20} onPress={() => router.push('/goal-edit')} />}>
+>>>>>>> e6cf9706e9e0f5893dd474a69ab2f09cf3f2b5df
       {goals.length === 0 ? (
         <Card>
           <EmptyState
@@ -163,6 +183,7 @@ export default function Goals() {
         </Card>
       ) : (
         <>
+<<<<<<< HEAD
           <GradientCard
             colors={SAVINGS_GRADIENT}
             style={{
@@ -170,6 +191,9 @@ export default function Goals() {
               boxShadow: "0px 14px 32px rgba(14, 159, 110, 0.32)",
             }}
           >
+=======
+          <GradientCard colors={SAVINGS_GRADIENT} style={{ gap: Spacing.md, boxShadow: '0px 4px 12px rgba(14, 159, 110, 0.22)' }}>
+>>>>>>> e6cf9706e9e0f5893dd474a69ab2f09cf3f2b5df
             <View>
               <T variant="caption" tone="inverse" style={{ opacity: 0.85 }}>
                 Épargné au total
@@ -222,11 +246,16 @@ export default function Goals() {
             <GoalCard key={g.id} goal={g} />
           ))}
 
+<<<<<<< HEAD
           <Card
             onPress={() => router.push("/goal-edit")}
             style={styles.addCard}
           >
             <CategoryIcon icon="add" color="#5B4CF0" size={40} />
+=======
+          <Card onPress={() => router.push('/goal-edit')} style={styles.addCard}>
+            <CategoryIcon icon="add" color="#5B4CF0" size={32} />
+>>>>>>> e6cf9706e9e0f5893dd474a69ab2f09cf3f2b5df
             <T variant="bodyBold" tone="primary">
               Nouvel objectif
             </T>

@@ -17,7 +17,7 @@ function ToolCard({ icon, color, title, subtitle, href }: { icon: IconName; colo
   return (
     <Card onPress={() => router.push(href)}>
       <Row gap={Spacing.md}>
-        <CategoryIcon icon={icon} color={color} size={44} />
+        <CategoryIcon icon={icon} color={color} size={38} />
         <View style={{ flex: 1 }}>
           <T variant="bodyBold">{title}</T>
           <T variant="caption" tone="secondary">
@@ -42,7 +42,7 @@ export default function Tools() {
 
   return (
     <Screen>
-      <GradientCard colors={NET_GRADIENT} style={{ gap: Spacing.xs, boxShadow: '0px 14px 32px rgba(17, 20, 40, 0.3)' }}>
+      <GradientCard colors={NET_GRADIENT} style={{ gap: Spacing.xs, boxShadow: '0px 4px 12px rgba(17, 20, 40, 0.2)' }}>
         <T variant="caption" tone="inverse" style={{ opacity: 0.8 }}>
           Situation nette (épargne − dettes)
         </T>

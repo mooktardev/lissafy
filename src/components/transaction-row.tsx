@@ -29,7 +29,7 @@ export function TransactionRow({
     <Pressable
       onPress={() => router.push({ pathname: '/transaction', params: { id: transaction.id } })}
       style={({ pressed }) => [styles.row, pressed && { opacity: 0.6 }]}>
-      <CategoryIcon icon={category?.icon ?? 'help'} color={category?.color ?? '#64748B'} size={44} />
+      <CategoryIcon icon={category?.icon ?? 'help'} color={category?.color ?? '#64748B'} size={38} />
       <View style={{ flex: 1, gap: 2 }}>
         <T variant="bodyBold" numberOfLines={1}>
           {title}
@@ -48,5 +48,5 @@ export function TransactionRow({
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md, paddingVertical: Spacing.md },
+  row: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md, paddingVertical: Spacing.sm + 2 },
 });

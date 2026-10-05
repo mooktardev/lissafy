@@ -11,7 +11,7 @@ import type { IconName } from '@/lib/types';
 type TabIconProps = { color: ColorValue; focused: boolean; size: number };
 
 function TabIcon({ name, focusedName, color, focused }: TabIconProps & { name: IconName; focusedName: IconName }) {
-  return <Ionicons name={focused ? focusedName : name} color={color} size={24} />;
+  return <Ionicons name={focused ? focusedName : name} color={color} size={22} />;
 }
 
 const icon = (name: IconName, focusedName: IconName) =>
@@ -29,10 +29,10 @@ function AddButton() {
         onPress={() => router.push('/transaction')}
         style={({ pressed }) => [
           styles.addButton,
-          { backgroundColor: theme.primary, boxShadow: `0px 8px 20px ${theme.primary}66`, borderColor: theme.tabBar },
+          { backgroundColor: theme.primary, boxShadow: `0px 3px 8px ${theme.primary}4D`, borderColor: theme.tabBar },
           pressed && { transform: [{ scale: 0.94 }] },
         ]}>
-        <Ionicons name="add" size={32} color="#FFFFFF" />
+        <Ionicons name="add" size={28} color="#FFFFFF" />
       </Pressable>
     </View>
   );
@@ -47,14 +47,14 @@ export default function TabsLayout() {
         headerShown: false,
         tabBarActiveTintColor: theme.primary,
         tabBarInactiveTintColor: theme.textSecondary,
-        tabBarLabelStyle: { fontFamily: Fonts.semibold, fontSize: 11 },
+        tabBarLabelStyle: { fontFamily: Fonts.semibold, fontSize: 11, lineHeight: 14, height: 14, flexShrink: 0 },
         tabBarStyle: {
           backgroundColor: theme.tabBar,
           borderTopWidth: 0,
-          height: 64 + insets.bottom,
-          paddingTop: 8,
-          paddingBottom: insets.bottom + 8,
-          boxShadow: '0px -4px 24px rgba(20, 24, 60, 0.08)',
+          height: 58 + insets.bottom,
+          paddingTop: 0,
+          paddingBottom: insets.bottom,
+          boxShadow: '0px -1px 4px rgba(20, 24, 60, 0.06)',
         },
         sceneStyle: { backgroundColor: theme.background },
       }}>
@@ -76,10 +76,10 @@ export default function TabsLayout() {
 const styles = StyleSheet.create({
   addSlot: { flex: 1, alignItems: 'center' },
   addButton: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    marginTop: -22,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    marginTop: -18,
     borderWidth: 4,
     alignItems: 'center',
     justifyContent: 'center',
