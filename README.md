@@ -1,17 +1,17 @@
-# Planifin
+# Lissafy
 
 Application mobile de planification financière personnelle, construite avec **Expo SDK 57** (React Native, Expo Router, TypeScript). Toutes les données restent **sur l'appareil** : pas de compte, pas de serveur.
 
 ## Fonctionnalités
 
-| Écran | Contenu |
-| --- | --- |
-| **Accueil** | Carte de solde du mois (revenus, dépenses, taux d'épargne), actions rapides, « reste à dépenser » avec montant par jour, répartition des dépenses, carrousel d'objectifs, évolution sur 6 mois, dernières transactions |
-| **Activité** | Transactions groupées par jour, filtres Dépenses / Revenus, recherche |
-| **＋ (bouton central)** | Ajout rapide d'une transaction depuis n'importe quel onglet |
-| **Budget** | Anneau de suivi global, catégories suivies avec barres de progression, alertes à 85 % et en dépassement, suggestion basée sur le mois précédent |
-| **Objectifs** | Total épargné, objectifs avec anneau de progression, échéance et effort mensuel calculé automatiquement |
-| **Outils** (icône en haut de l'accueil) | Situation nette, simulateur d'épargne (intérêts composés), dettes et prêts (échéancier, paiements, remboursement anticipé, stratégie avalanche), catégories, réglages |
+| Écran                                   | Contenu                                                                                                                                                                                                                |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Accueil**                             | Carte de solde du mois (revenus, dépenses, taux d'épargne), actions rapides, « reste à dépenser » avec montant par jour, répartition des dépenses, carrousel d'objectifs, évolution sur 6 mois, dernières transactions |
+| **Activité**                            | Transactions groupées par jour, filtres Dépenses / Revenus, recherche                                                                                                                                                  |
+| **＋ (bouton central)**                 | Ajout rapide d'une transaction depuis n'importe quel onglet                                                                                                                                                            |
+| **Budget**                              | Anneau de suivi global, catégories suivies avec barres de progression, alertes à 85 % et en dépassement, suggestion basée sur le mois précédent                                                                        |
+| **Objectifs**                           | Total épargné, objectifs avec anneau de progression, échéance et effort mensuel calculé automatiquement                                                                                                                |
+| **Outils** (icône en haut de l'accueil) | Situation nette, simulateur d'épargne (intérêts composés), dettes et prêts (échéancier, paiements, remboursement anticipé, stratégie avalanche), catégories, réglages                                                  |
 
 **Design :** police Plus Jakarta Sans, cartes en dégradé, ombres douces, thème clair et sombre soignés.
 
@@ -67,7 +67,7 @@ Avec [EAS Build](https://docs.expo.dev/build/introduction/) :
 npx eas-cli@latest build --platform android --profile preview
 ```
 
-Identifiants configurés dans `app.json` : `com.planifin.app` (iOS et Android) — à adapter avant publication.
+Identifiants configurés dans `app.json` : `com.Lissafy.app` (iOS et Android) — à adapter avant publication.
 
 ## Pistes d'évolution
 
