@@ -12,6 +12,7 @@ Application mobile de planification financière personnelle, construite avec **E
 | **Budget**                              | Anneau de suivi global, catégories suivies avec barres de progression, alertes à 85 % et en dépassement, suggestion basée sur le mois précédent                                                                        |
 | **Objectifs**                           | Total épargné, objectifs avec anneau de progression, échéance et effort mensuel calculé automatiquement                                                                                                                |
 | **Outils** (icône en haut de l'accueil) | Situation nette, simulateur d'épargne (intérêts composés), dettes et prêts (échéancier, paiements, remboursement anticipé, stratégie avalanche), catégories, réglages                                                  |
+| **Récurrences** (Outils)                | Salaire, loyer, abonnements ajoutés automatiquement à chaque échéance (rattrapage inclus), charges et revenus fixes par mois, prochaines échéances sur l'accueil                                                       |
 
 **Design :** police Plus Jakarta Sans, cartes en dégradé, ombres douces, thème clair et sombre soignés.
 
