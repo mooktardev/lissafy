@@ -107,7 +107,7 @@ export default function Goals() {
           <EmptyState
             icon="flag"
             title="Aucun objectif pour l’instant"
-            message="Fonds d'urgence, vacances, apport immobilier… Fixez un montant et une échéance : Planifin calcule combien mettre de côté chaque mois."
+            message="Fonds d'urgence, vacances, apport immobilier… Fixez un montant et une échéance : Lissafy calcule combien mettre de côté chaque mois."
             action={
               <Button title="Créer un objectif" icon="add" onPress={() => router.push('/goal-edit')} style={{ marginTop: Spacing.sm }} />
             }

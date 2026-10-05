@@ -1,15 +1,15 @@
 {
   "expo": {
-    "name": "Planifin",
-    "slug": "planifin",
+    "name": "Lissafy",
+    "slug": "Lissafy",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "planifin",
+    "scheme": "Lissafy",
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon",
-      "bundleIdentifier": "com.planifin.app",
+      "bundleIdentifier": "com.Lissafy.app",
       "supportsTablet": true
     },
     "android": {
@@ -20,7 +20,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.planifin.app"
+      "package": "com.Lissafy.app"
     },
     "web": {
       "output": "single",

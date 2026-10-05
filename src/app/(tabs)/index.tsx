@@ -210,7 +210,7 @@ export default function Dashboard() {
         <Card>
           <EmptyState
             icon="sparkles"
-            title="Bienvenue dans Planifin"
+            title="Bienvenue dans Lissafy"
             message="Enregistrez vos revenus et dépenses, fixez des budgets et suivez vos objectifs d'épargne. Tout reste sur votre téléphone."
             action={
               <Button
