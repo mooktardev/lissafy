@@ -1,4 +1,4 @@
-# Planifin
+# Lissafy
 
 Application mobile de planification financière personnelle, construite avec **Expo SDK 57** (React Native, Expo Router, TypeScript). Toutes les données restent **sur l'appareil** : pas de compte, pas de serveur.
 
