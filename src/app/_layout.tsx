@@ -10,10 +10,12 @@ import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useSyncExternalStore } from 'react';
+import { AppState } from 'react-native';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 
 import { Fonts } from '@/constants/theme';
 import { useResolvedScheme, useTheme } from '@/hooks/use-theme';
+import { today } from '@/lib/dates';
 import { useStore } from '@/store';
 
 SplashScreen.preventAutoHideAsync();
@@ -24,6 +26,19 @@ function useHydrated() {
     () => useStore.persist.hasHydrated(),
     () => false,
   );
+}
+
+/** Génère les transactions récurrentes arrivées à échéance (au démarrage et au retour au premier plan). */
+function useRecurringGeneration(enabled: boolean) {
+  useEffect(() => {
+    if (!enabled) return;
+    const apply = () => useStore.getState().applyRecurring(today());
+    apply();
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state === 'active') apply();
+    });
+    return () => sub.remove();
+  }, [enabled]);
 }
 
 export default function RootLayout() {
@@ -37,6 +52,7 @@ export default function RootLayout() {
   });
   // En cas d'échec de chargement, on continue avec la police système.
   const ready = hydrated && (fontsLoaded || fontError !== null);
+  useRecurringGeneration(hydrated);
   const scheme = useResolvedScheme();
   const theme = useTheme();
 
@@ -84,6 +100,8 @@ export default function RootLayout() {
         <Stack.Screen name="category" options={{ presentation: 'modal', title: 'Catégorie' }} />
         <Stack.Screen name="settings" options={{ title: 'Réglages' }} />
         <Stack.Screen name="tools" options={{ title: 'Outils' }} />
+        <Stack.Screen name="recurring" options={{ title: 'Récurrences' }} />
+        <Stack.Screen name="recurring-edit" options={{ presentation: 'modal', title: 'Récurrence' }} />
       </Stack>
     </ThemeProvider>
     </KeyboardProvider>

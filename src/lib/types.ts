@@ -26,6 +26,26 @@ export type Transaction = {
   categoryId: string;
   date: ISODate;
   note: string;
+  /** Règle de récurrence ayant généré cette transaction. */
+  recurringId?: string;
+};
+
+export type Frequency = 'weekly' | 'monthly' | 'yearly';
+
+/** Transaction répétée automatiquement (salaire, loyer, abonnement…). */
+export type Recurring = {
+  id: string;
+  kind: TransactionKind;
+  amount: number;
+  categoryId: string;
+  note: string;
+  frequency: Frequency;
+  /** Première échéance ; fixe aussi le jour du mois ou de la semaine. */
+  startDate: ISODate;
+  endDate: ISODate | null;
+  /** Date de la dernière échéance déjà transformée en transaction. */
+  lastGenerated: ISODate | null;
+  active: boolean;
 };
 
 /** Plafond mensuel récurrent pour une catégorie de dépenses. */

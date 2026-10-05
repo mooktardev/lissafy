@@ -24,7 +24,7 @@ import {
 } from '@/components/ui';
 import { Fonts, Radius, Spacing } from '@/constants/theme';
 import { useCurrency, useTheme } from '@/hooks/use-theme';
-import { currentMonth, daysInMonth, formatMonth, formatMonthShort, today } from '@/lib/dates';
+import { addDays, currentMonth, daysInMonth, formatDayHeader, formatMonth, formatMonthShort, today } from '@/lib/dates';
 import {
   averageMonthlyNet,
   budgetStatuses,
@@ -37,6 +37,7 @@ import {
   transactionsOfMonth,
 } from '@/lib/finance';
 import { formatMoney, formatPercent } from '@/lib/format';
+import { occurrencesBetween } from '@/lib/recurring';
 import { useStore } from '@/store';
 import { useUi } from '@/store/ui';
 
@@ -54,6 +55,7 @@ export default function Dashboard() {
   const categories = useStore((s) => s.categories);
   const budgets = useStore((s) => s.budgets);
   const goals = useStore((s) => s.goals);
+  const recurrings = useStore((s) => s.recurrings);
 
   const money = (n: number, opts?: { sign?: boolean; compact?: boolean }) => formatMoney(n, currency, opts);
   const catById = new Map(categories.map((c) => [c.id, c]));
@@ -80,6 +82,13 @@ export default function Dashboard() {
   const overBudget = statuses.filter((s) => s.ratio > 1).length;
 
   const savingsRate = summary.savingsRate;
+
+  // Échéances récurrentes des 30 prochains jours.
+  const t = today();
+  const upcoming = recurrings
+    .flatMap((r) => occurrencesBetween(r, t, addDays(t, 30)).map((date) => ({ rule: r, date })))
+    .sort((a, b) => a.date.localeCompare(b.date));
+  const upcomingNet = upcoming.reduce((a, u) => a + (u.rule.kind === 'income' ? u.rule.amount : -u.rule.amount), 0);
 
   // Barre de solde compacte affichée dans l'en-tête fixe une fois la grande carte sortie de l'écran.
   const [heroBottom, setHeroBottom] = useState(0);
@@ -255,6 +264,50 @@ export default function Dashboard() {
             <Ionicons name="chevron-forward" size={20} color={theme.textSecondary} />
           </Row>
         </Card>
+      ) : null}
+
+      {/* Prochaines échéances récurrentes */}
+      {upcoming.length > 0 ? (
+        <>
+          <SectionHeader title="Prochaines échéances" action="Gérer" onAction={() => router.push('/recurring')} />
+          <Card style={{ paddingVertical: Spacing.xs }}>
+            {upcoming.slice(0, 4).map((u, i) => {
+              const c = catById.get(u.rule.categoryId);
+              const isIncome = u.rule.kind === 'income';
+              return (
+                <View key={`${u.rule.id}-${u.date}`}>
+                  {i > 0 ? <Divider inset={50} /> : null}
+                  <Row gap={Spacing.md} style={{ paddingVertical: Spacing.sm + 2 }}>
+                    <CategoryIcon icon={c?.icon ?? 'repeat'} color={c?.color ?? theme.primary} size={38} />
+                    <View style={{ flex: 1, gap: 2 }}>
+                      <T variant="bodyBold" numberOfLines={1}>
+                        {u.rule.note || c?.name || 'Sans catégorie'}
+                      </T>
+                      <Row gap={4}>
+                        <Ionicons name="repeat" size={12} color={theme.textSecondary} />
+                        <T variant="caption" tone="secondary">
+                          {formatDayHeader(u.date)}
+                        </T>
+                      </Row>
+                    </View>
+                    <T variant="amount" tone={isIncome ? 'income' : 'default'}>
+                      {money(isIncome ? u.rule.amount : -u.rule.amount, { sign: true })}
+                    </T>
+                  </Row>
+                </View>
+              );
+            })}
+            <Divider />
+            <Row style={{ paddingVertical: Spacing.sm }}>
+              <T variant="caption" tone="secondary" style={{ flex: 1 }}>
+                Total sur 30 jours{upcoming.length > 4 ? ` (${upcoming.length} échéances)` : ''}
+              </T>
+              <T variant="caption" tone={upcomingNet >= 0 ? 'income' : 'expense'} style={{ fontFamily: Fonts.bold }}>
+                {money(upcomingNet, { sign: true })}
+              </T>
+            </Row>
+          </Card>
+        </>
       ) : null}
 
       {/* Dépenses par catégorie */}

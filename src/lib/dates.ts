@@ -90,6 +90,7 @@ export function formatDayHeader(s: ISODate): string {
   const t = today();
   if (s === t) return "Aujourd'hui";
   if (s === addDays(t, -1)) return 'Hier';
+  if (s === addDays(t, 1)) return 'Demain';
   const d = parseISODate(s);
   const wd = WEEKDAYS[d.getDay()];
   return `${wd.charAt(0).toUpperCase()}${wd.slice(1)} ${d.getDate()} ${MONTHS[d.getMonth()]}`;

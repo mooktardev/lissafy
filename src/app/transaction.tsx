@@ -1,3 +1,4 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Platform, StyleSheet, TextInput, View, type TextStyle } from 'react-native';
@@ -8,7 +9,8 @@ import { Fonts, Spacing } from '@/constants/theme';
 import { useCurrency, useTheme } from '@/hooks/use-theme';
 import { addDays, currentMonth, today } from '@/lib/dates';
 import { amountToInput, parseAmount } from '@/lib/format';
-import type { ISODate, TransactionKind } from '@/lib/types';
+import { describeSchedule, FREQUENCY_LABELS } from '@/lib/recurring';
+import type { Frequency, ISODate, TransactionKind } from '@/lib/types';
 import { useStore } from '@/store';
 import { useUi } from '@/store/ui';
 
@@ -20,6 +22,9 @@ export default function TransactionForm() {
   const categories = useStore((s) => s.categories);
   const saveTransaction = useStore((s) => s.saveTransaction);
   const deleteTransaction = useStore((s) => s.deleteTransaction);
+  const saveRecurring = useStore((s) => s.saveRecurring);
+  const applyRecurring = useStore((s) => s.applyRecurring);
+  const rule = useStore((s) => s.recurrings.find((r) => r.id === existing?.recurringId));
   const month = useUi((s) => s.month);
 
   const [kind, setKind] = useState<TransactionKind>(existing?.kind ?? (params.kind === 'income' ? 'income' : 'expense'));
@@ -27,6 +32,7 @@ export default function TransactionForm() {
   const [categoryId, setCategoryId] = useState<string | null>(existing?.categoryId ?? null);
   const [date, setDate] = useState<ISODate>(existing?.date ?? (month === currentMonth() ? today() : `${month}-01`));
   const [note, setNote] = useState(existing?.note ?? '');
+  const [repeat, setRepeat] = useState<Frequency | 'none'>('none');
 
   const available = categories.filter((c) => c.kind === kind);
   const effectiveCategory = available.some((c) => c.id === categoryId) ? categoryId : null;
@@ -38,7 +44,23 @@ export default function TransactionForm() {
 
   const save = () => {
     if (!valid || !effectiveCategory) return;
-    saveTransaction({ id: existing?.id, kind, amount: value, categoryId: effectiveCategory, date, note: note.trim() });
+    const base = { kind, amount: value, categoryId: effectiveCategory, note: note.trim() };
+    if (!existing && repeat !== 'none') {
+      // Cette transaction est la première échéance ; les suivantes seront créées automatiquement.
+      const ruleId = saveRecurring({
+        ...base,
+        frequency: repeat,
+        startDate: date,
+        endDate: null,
+        active: true,
+        lastGenerated: date,
+      });
+      saveTransaction({ ...base, date, recurringId: ruleId });
+      // Rattrape les échéances déjà passées si la date de départ est ancienne.
+      applyRecurring(today());
+    } else {
+      saveTransaction({ ...base, id: existing?.id, date, recurringId: existing?.recurringId });
+    }
     router.back();
   };
 
@@ -92,6 +114,38 @@ export default function TransactionForm() {
         </Row>
         <DateField value={date} onChange={(d) => d && setDate(d)} />
       </Field>
+
+      {existing ? (
+        rule ? (
+          <Card
+            onPress={() => router.push({ pathname: '/recurring-edit', params: { id: rule.id } })}
+            style={{ backgroundColor: theme.primarySoft, boxShadow: 'none' }}>
+            <Row>
+              <Ionicons name="repeat" size={18} color={theme.primary} />
+              <View style={{ flex: 1 }}>
+                <T variant="bodyBold" tone="primary">
+                  Transaction récurrente
+                </T>
+                <T variant="caption" tone="primary">
+                  {describeSchedule(rule.frequency, rule.startDate)} · modifier ici ne change que cette échéance
+                </T>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={theme.primary} />
+            </Row>
+          </Card>
+        ) : null
+      ) : (
+        <Field
+          label="Répéter"
+          hint={repeat === 'none' ? undefined : `Ajoutée automatiquement ${describeSchedule(repeat, date)}.`}>
+          <Row style={{ flexWrap: 'wrap' }}>
+            <Chip label="Jamais" selected={repeat === 'none'} onPress={() => setRepeat('none')} />
+            {(Object.keys(FREQUENCY_LABELS) as Frequency[]).map((f) => (
+              <Chip key={f} label={FREQUENCY_LABELS[f]} icon="repeat" selected={repeat === f} onPress={() => setRepeat(f)} />
+            ))}
+          </Row>
+        </Field>
+      )}
 
       <Field label="Note (facultatif)">
         <Input icon="create-outline" value={note} onChangeText={setNote} placeholder="Ex. courses du samedi" maxLength={80} />

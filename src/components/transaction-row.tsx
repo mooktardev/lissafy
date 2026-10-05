@@ -1,8 +1,9 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Spacing } from '@/constants/theme';
-import { useCurrency } from '@/hooks/use-theme';
+import { useCurrency, useTheme } from '@/hooks/use-theme';
 import { formatDayHeader } from '@/lib/dates';
 import { formatMoney } from '@/lib/format';
 import type { Category, Transaction } from '@/lib/types';
@@ -19,6 +20,7 @@ export function TransactionRow({
   /** Affiche la date plutôt que la catégorie en sous-titre. */
   showDate?: boolean;
 }) {
+  const theme = useTheme();
   const currency = useCurrency();
   const isIncome = transaction.kind === 'income';
   const title = transaction.note || category?.name || 'Sans catégorie';
@@ -34,10 +36,13 @@ export function TransactionRow({
         <T variant="bodyBold" numberOfLines={1}>
           {title}
         </T>
-        {subtitle ? (
-          <T variant="caption" tone="secondary" numberOfLines={1}>
-            {subtitle}
-          </T>
+        {subtitle || transaction.recurringId ? (
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            {transaction.recurringId ? <Ionicons name="repeat" size={12} color={theme.textSecondary} /> : null}
+            <T variant="caption" tone="secondary" numberOfLines={1} style={{ flexShrink: 1 }}>
+              {subtitle || 'Récurrente'}
+            </T>
+          </View>
         ) : null}
       </View>
       <T variant="amount" tone={isIncome ? 'income' : 'default'}>

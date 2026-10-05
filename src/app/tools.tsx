@@ -35,6 +35,7 @@ export default function Tools() {
   const goals = useStore((s) => s.goals);
   const debts = useStore((s) => s.debts);
   const categories = useStore((s) => s.categories);
+  const recurringCount = useStore((s) => s.recurrings.filter((r) => r.active).length);
 
   const savings = goals.reduce((a, g) => a + goalSaved(g), 0);
   const totalDebt = debts.reduce((a, d) => a + debtBalance(d), 0);
@@ -56,6 +57,17 @@ export default function Tools() {
       </Row>
 
       <SectionHeader title="Planification" />
+      <ToolCard
+        icon="repeat"
+        color="#5B4CF0"
+        title="Récurrences"
+        subtitle={
+          recurringCount
+            ? `${recurringCount} active${recurringCount > 1 ? 's' : ''} · salaire, loyer, abonnements…`
+            : 'Salaire, loyer, abonnements ajoutés automatiquement'
+        }
+        href="/recurring"
+      />
       <ToolCard
         icon="trending-up"
         color="#10B981"

@@ -6,6 +6,7 @@ import { today } from "@/lib/dates";
 import { DEFAULT_CATEGORIES } from "@/lib/defaults";
 import { debtBalance, monthlyInterest, round2 } from "@/lib/finance";
 import { newId } from "@/lib/format";
+import { dueOccurrences } from "@/lib/recurring";
 import type {
     Budget,
     Category,
@@ -13,6 +14,7 @@ import type {
     Debt,
     Goal,
     ISODate,
+    Recurring,
     Settings,
     Transaction,
 } from "@/lib/types";
@@ -24,6 +26,7 @@ export type AppData = {
   budgets: Budget[];
   goals: Goal[];
   debts: Debt[];
+  recurrings: Recurring[];
 };
 
 type Actions = {
@@ -52,6 +55,18 @@ type Actions = {
   addDebtPayment: (debtId: string, amount: number, date: ISODate) => void;
   deleteDebtPayment: (debtId: string, paymentId: string) => void;
 
+  /** Crée ou modifie une récurrence (les échéances passées ne sont pas regénérées). */
+  saveRecurring: (
+    r: Omit<Recurring, "id" | "lastGenerated"> & {
+      id?: string;
+      lastGenerated?: ISODate | null;
+    },
+  ) => string;
+  /** Supprime la règle ; les transactions déjà créées sont conservées. */
+  deleteRecurring: (id: string) => void;
+  /** Crée les transactions des échéances arrivées jusqu'à `date` incluse. */
+  applyRecurring: (date: ISODate) => void;
+
   importData: (data: AppData) => void;
   resetAll: () => void;
 };
@@ -65,6 +80,7 @@ export const initialData = (): AppData => ({
   budgets: [],
   goals: [],
   debts: [],
+  recurrings: [],
 });
 
 function upsert<T extends { id: string }>(list: T[], item: T): T[] {
@@ -118,6 +134,9 @@ export const useStore = create<AppState>()(
             t.categoryId === id ? { ...t, categoryId: fallbackId } : t,
           ),
           budgets: s.budgets.filter((b) => b.categoryId !== id),
+          recurrings: s.recurrings.map((r) =>
+            r.categoryId === id ? { ...r, categoryId: fallbackId } : r,
+          ),
         })),
 
       setBudget: (categoryId, amount) =>
@@ -196,6 +215,53 @@ export const useStore = create<AppState>()(
           ),
         })),
 
+      saveRecurring: ({ id, lastGenerated, ...rest }) => {
+        const ruleId = id ?? newId();
+        set((s) => {
+          const existing = s.recurrings.find((r) => r.id === ruleId);
+          const rule: Recurring = {
+            ...rest,
+            id: ruleId,
+            lastGenerated:
+              lastGenerated !== undefined
+                ? lastGenerated
+                : (existing?.lastGenerated ?? null),
+          };
+          return { recurrings: upsert(s.recurrings, rule) };
+        });
+        return ruleId;
+      },
+      deleteRecurring: (id) =>
+        set((s) => ({
+          recurrings: s.recurrings.filter((r) => r.id !== id),
+          // Les transactions passées restent, sans lien vers la règle supprimée.
+          transactions: s.transactions.map((t) =>
+            t.recurringId === id ? { ...t, recurringId: undefined } : t,
+          ),
+        })),
+      applyRecurring: (date) =>
+        set((s) => {
+          const created: Transaction[] = [];
+          const recurrings = s.recurrings.map((r) => {
+            const due = dueOccurrences(r, date);
+            if (due.length === 0) return r;
+            for (const d of due) {
+              created.push({
+                id: newId(),
+                kind: r.kind,
+                amount: r.amount,
+                categoryId: r.categoryId,
+                note: r.note,
+                date: d,
+                recurringId: r.id,
+              });
+            }
+            return { ...r, lastGenerated: due[due.length - 1] };
+          });
+          if (created.length === 0) return {};
+          return { recurrings, transactions: [...s.transactions, ...created] };
+        }),
+
       importData: (data) => set({ ...initialData(), ...data }),
       resetAll: () => set(initialData()),
     }),
@@ -210,6 +276,7 @@ export const useStore = create<AppState>()(
         budgets,
         goals,
         debts,
+        recurrings,
       }): AppData => ({
         settings,
         categories,
@@ -217,14 +284,24 @@ export const useStore = create<AppState>()(
         budgets,
         goals,
         debts,
+        recurrings,
       }),
     },
   ),
 );
 
 export function selectData(s: AppState): AppData {
-  const { settings, categories, transactions, budgets, goals, debts } = s;
-  return { settings, categories, transactions, budgets, goals, debts };
+  const { settings, categories, transactions, budgets, goals, debts, recurrings } =
+    s;
+  return {
+    settings,
+    categories,
+    transactions,
+    budgets,
+    goals,
+    debts,
+    recurrings,
+  };
 }
 
 /** Validation minimale d'un fichier de sauvegarde importé. */
