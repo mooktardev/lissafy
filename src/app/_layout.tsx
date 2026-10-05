@@ -10,6 +10,7 @@ import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useSyncExternalStore } from 'react';
+import { KeyboardProvider } from 'react-native-keyboard-controller';
 
 import { Fonts } from '@/constants/theme';
 import { useResolvedScheme, useTheme } from '@/hooks/use-theme';
@@ -59,6 +60,7 @@ export default function RootLayout() {
   };
 
   return (
+    <KeyboardProvider>
     <ThemeProvider value={navTheme}>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <Stack
@@ -84,5 +86,6 @@ export default function RootLayout() {
         <Stack.Screen name="tools" options={{ title: 'Outils' }} />
       </Stack>
     </ThemeProvider>
+    </KeyboardProvider>
   );
 }

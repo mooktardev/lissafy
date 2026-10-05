@@ -1,6 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { useState } from 'react';
+import { ScrollView, StyleSheet, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native';
 
 import { BarChart, DonutChart } from '@/components/charts';
 import { MonthSwitcher } from '@/components/pickers';
@@ -23,7 +24,7 @@ import {
 } from '@/components/ui';
 import { Fonts, Radius, Spacing } from '@/constants/theme';
 import { useCurrency, useTheme } from '@/hooks/use-theme';
-import { currentMonth, daysInMonth, formatMonthShort, today } from '@/lib/dates';
+import { currentMonth, daysInMonth, formatMonth, formatMonthShort, today } from '@/lib/dates';
 import {
   averageMonthlyNet,
   budgetStatuses,
@@ -80,6 +81,14 @@ export default function Dashboard() {
 
   const savingsRate = summary.savingsRate;
 
+  // Barre de solde compacte affichée dans l'en-tête fixe une fois la grande carte sortie de l'écran.
+  const [heroBottom, setHeroBottom] = useState(0);
+  const [compact, setCompact] = useState(false);
+  const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const next = heroBottom > 0 && e.nativeEvent.contentOffset.y > heroBottom - Spacing.md;
+    if (next !== compact) setCompact(next);
+  };
+
   return (
     <Screen
       subtitle={`${greeting()} 👋`}
@@ -89,8 +98,35 @@ export default function Dashboard() {
           <IconButton icon="grid-outline" label="Outils" filled size={20} onPress={() => router.push('/tools')} />
           <IconButton icon="settings-outline" label="Réglages" filled size={20} onPress={() => router.push('/settings')} />
         </Row>
+      }
+      onScroll={onScroll}
+      scrollEventThrottle={32}
+      headerAccessory={
+        compact ? (
+          <GradientCard style={{ padding: Spacing.md, marginBottom: Spacing.xs }}>
+            <Row gap={Spacing.md}>
+              <View style={{ flex: 1 }}>
+                <T variant="caption" tone="inverse" style={{ opacity: 0.85 }}>
+                  Solde · {formatMonth(month)}
+                </T>
+                <T variant="amount" tone="inverse" style={{ fontSize: 17 }} numberOfLines={1}>
+                  {money(summary.net, { sign: true })}
+                </T>
+              </View>
+              <View style={{ alignItems: 'flex-end' }}>
+                <T variant="caption" style={{ color: '#7CF5C4', fontFamily: Fonts.bold }}>
+                  ↓ {money(summary.income, { compact: true })}
+                </T>
+                <T variant="caption" style={{ color: '#FFB4B6', fontFamily: Fonts.bold }}>
+                  ↑ {money(summary.expense, { compact: true })}
+                </T>
+              </View>
+            </Row>
+          </GradientCard>
+        ) : null
       }>
       {/* Carte principale */}
+      <View onLayout={(e) => setHeroBottom(e.nativeEvent.layout.y + e.nativeEvent.layout.height)}>
       <GradientCard style={{ gap: Spacing.md }}>
         <Row>
           <T variant="caption" tone="inverse" style={{ flex: 1, opacity: 0.85 }}>
@@ -148,6 +184,7 @@ export default function Dashboard() {
           </View>
         ) : null}
       </GradientCard>
+      </View>
 
       {/* Actions rapides */}
       <Card style={{ paddingVertical: Spacing.md }}>

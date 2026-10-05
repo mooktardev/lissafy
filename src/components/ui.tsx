@@ -4,7 +4,6 @@ import {
   Alert,
   Platform,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -16,6 +15,7 @@ import {
   type TextStyle,
   type ViewStyle,
 } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle, Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
@@ -37,6 +37,7 @@ export function Screen({
   title,
   subtitle,
   right,
+  headerAccessory,
   ...rest
 }: ScrollViewProps & {
   children: ReactNode;
@@ -44,6 +45,8 @@ export function Screen({
   title?: string;
   subtitle?: string;
   right?: ReactNode;
+  /** Contenu supplémentaire affiché dans l'en-tête fixe, sous le titre. */
+  headerAccessory?: ReactNode;
 }) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
@@ -65,16 +68,19 @@ export function Screen({
             </View>
             {right}
           </Row>
+          {headerAccessory ? <View style={styles.headerInner}>{headerAccessory}</View> : null}
         </View>
       ) : null}
-      <ScrollView
+      {/* Fait défiler le champ actif au-dessus du clavier. */}
+      <KeyboardAwareScrollView
         style={{ flex: 1 }}
+        bottomOffset={Spacing.xl}
         contentContainerStyle={[styles.screenContent, title ? { paddingTop: Spacing.sm } : null, contentStyle]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
         {...rest}>
         {children}
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </View>
   );
 }

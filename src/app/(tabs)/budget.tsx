@@ -1,6 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useState } from 'react';
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 
 import { MonthSwitcher } from '@/components/pickers';
 import {
@@ -210,6 +211,7 @@ export default function BudgetScreen() {
       ) : null}
 
       <Modal visible={editing !== null} transparent animationType="fade" onRequestClose={() => setEditing(null)}>
+        <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
         <Pressable style={[styles.backdrop, { backgroundColor: theme.overlay }]} onPress={() => setEditing(null)}>
           <Pressable style={[styles.sheet, { backgroundColor: theme.card }]} onPress={() => {}}>
             {editing ? (
@@ -243,6 +245,7 @@ export default function BudgetScreen() {
             ) : null}
           </Pressable>
         </Pressable>
+        </KeyboardAvoidingView>
       </Modal>
     </Screen>
   );
