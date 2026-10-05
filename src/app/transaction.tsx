@@ -108,11 +108,11 @@ export default function TransactionForm() {
 const webNoOutline = { outlineStyle: 'none' } as unknown as TextStyle;
 
 const styles = StyleSheet.create({
-  amountCard: { alignItems: 'center', gap: Spacing.xs, paddingVertical: Spacing.xl },
+  amountCard: { alignItems: 'center', gap: Spacing.xs, paddingVertical: Spacing.lg },
   amountInput: {
     fontFamily: Fonts.extrabold,
-    fontSize: 46,
-    letterSpacing: -1.2,
+    fontSize: 36,
+    letterSpacing: -1,
     alignSelf: 'stretch',
     textAlign: 'center',
     paddingVertical: 0,

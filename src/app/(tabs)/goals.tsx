@@ -36,10 +36,10 @@ function GoalCard({ goal }: { goal: Goal }) {
   const late = goal.deadline !== null && goal.deadline < today() && !done;
 
   return (
-    <Card onPress={() => router.push({ pathname: '/goal/[id]', params: { id: goal.id } })} style={{ gap: Spacing.lg }}>
+    <Card onPress={() => router.push({ pathname: '/goal/[id]', params: { id: goal.id } })} style={{ gap: Spacing.md }}>
       <Row gap={Spacing.md}>
-        <ProgressRing ratio={progress} color={goal.color} size={64} thickness={6}>
-          <Ionicons name={done ? 'checkmark' : goal.icon} size={24} color={goal.color} />
+        <ProgressRing ratio={progress} color={goal.color} size={52} thickness={5}>
+          <Ionicons name={done ? 'checkmark' : goal.icon} size={20} color={goal.color} />
         </ProgressRing>
         <View style={{ flex: 1, gap: 2 }}>
           <T variant="heading" numberOfLines={1}>
@@ -61,7 +61,7 @@ function GoalCard({ goal }: { goal: Goal }) {
         </T>
       </Row>
       <View style={{ gap: Spacing.sm }}>
-        <ProgressBar ratio={progress} color={goal.color} height={8} />
+        <ProgressBar ratio={progress} color={goal.color} height={6} />
         <Row>
           <T variant="caption" tone="secondary" style={{ flex: 1 }}>
             <T variant="caption" style={{ fontFamily: Fonts.bold }}>
@@ -71,13 +71,13 @@ function GoalCard({ goal }: { goal: Goal }) {
           </T>
           {done ? (
             <View style={[styles.badge, { backgroundColor: theme.incomeSoft }]}>
-              <T variant="caption" tone="income" style={{ fontFamily: Fonts.bold, fontSize: 12 }}>
+              <T variant="caption" tone="income" style={{ fontFamily: Fonts.bold, fontSize: 11 }}>
                 Atteint 🎉
               </T>
             </View>
           ) : needed ? (
             <View style={[styles.badge, { backgroundColor: `${goal.color}1A` }]}>
-              <T variant="caption" style={{ color: goal.color, fontFamily: Fonts.bold, fontSize: 12 }}>
+              <T variant="caption" style={{ color: goal.color, fontFamily: Fonts.bold, fontSize: 11 }}>
                 {formatMoney(needed, currency)} / mois
               </T>
             </View>
@@ -101,7 +101,7 @@ export default function Goals() {
   return (
     <Screen
       title="Objectifs"
-      right={<IconButton icon="add" label="Nouvel objectif" filled onPress={() => router.push('/goal-edit')} />}>
+      right={<IconButton icon="add" label="Nouvel objectif" filled size={20} onPress={() => router.push('/goal-edit')} />}>
       {goals.length === 0 ? (
         <Card>
           <EmptyState
@@ -115,7 +115,7 @@ export default function Goals() {
         </Card>
       ) : (
         <>
-          <GradientCard colors={SAVINGS_GRADIENT} style={{ gap: Spacing.lg, boxShadow: '0px 14px 32px rgba(14, 159, 110, 0.32)' }}>
+          <GradientCard colors={SAVINGS_GRADIENT} style={{ gap: Spacing.md, boxShadow: '0px 4px 12px rgba(14, 159, 110, 0.22)' }}>
             <View>
               <T variant="caption" tone="inverse" style={{ opacity: 0.85 }}>
                 Épargné au total
@@ -155,7 +155,7 @@ export default function Goals() {
           ))}
 
           <Card onPress={() => router.push('/goal-edit')} style={styles.addCard}>
-            <CategoryIcon icon="add" color="#5B4CF0" size={40} />
+            <CategoryIcon icon="add" color="#5B4CF0" size={32} />
             <T variant="bodyBold" tone="primary">
               Nouvel objectif
             </T>

@@ -81,21 +81,17 @@ export default function Dashboard() {
   const savingsRate = summary.savingsRate;
 
   return (
-    <Screen>
-      {/* En-tête */}
-      <Row style={{ marginTop: Spacing.sm }}>
-        <View style={{ flex: 1 }}>
-          <T variant="caption" tone="secondary">
-            {greeting()} 👋
-          </T>
-          <T variant="title">Mon budget</T>
-        </View>
-        <IconButton icon="grid-outline" label="Outils" filled onPress={() => router.push('/tools')} />
-        <IconButton icon="settings-outline" label="Réglages" filled onPress={() => router.push('/settings')} />
-      </Row>
-
+    <Screen
+      subtitle={`${greeting()} 👋`}
+      title="Mon budget"
+      right={
+        <Row gap={Spacing.sm}>
+          <IconButton icon="grid-outline" label="Outils" filled size={20} onPress={() => router.push('/tools')} />
+          <IconButton icon="settings-outline" label="Réglages" filled size={20} onPress={() => router.push('/settings')} />
+        </Row>
+      }>
       {/* Carte principale */}
-      <GradientCard style={{ gap: Spacing.lg }}>
+      <GradientCard style={{ gap: Spacing.md }}>
         <Row>
           <T variant="caption" tone="inverse" style={{ flex: 1, opacity: 0.85 }}>
             Solde du mois
@@ -108,7 +104,7 @@ export default function Dashboard() {
         <Row gap={Spacing.md}>
           <View style={styles.heroStat}>
             <View style={[styles.heroStatIcon, { backgroundColor: 'rgba(61, 213, 152, 0.25)' }]}>
-              <Ionicons name="arrow-down" size={16} color="#7CF5C4" />
+              <Ionicons name="arrow-down" size={14} color="#7CF5C4" />
             </View>
             <View style={{ flex: 1 }}>
               <T variant="caption" tone="inverse" style={{ opacity: 0.8 }}>
@@ -121,7 +117,7 @@ export default function Dashboard() {
           </View>
           <View style={styles.heroStat}>
             <View style={[styles.heroStatIcon, { backgroundColor: 'rgba(255, 107, 112, 0.25)' }]}>
-              <Ionicons name="arrow-up" size={16} color="#FFB4B6" />
+              <Ionicons name="arrow-up" size={14} color="#FFB4B6" />
             </View>
             <View style={{ flex: 1 }}>
               <T variant="caption" tone="inverse" style={{ opacity: 0.8 }}>
@@ -154,7 +150,7 @@ export default function Dashboard() {
       </GradientCard>
 
       {/* Actions rapides */}
-      <Card style={{ paddingVertical: Spacing.lg }}>
+      <Card style={{ paddingVertical: Spacing.md }}>
         <Row gap={Spacing.xs}>
           <QuickAction
             icon="remove-circle"
@@ -198,8 +194,8 @@ export default function Dashboard() {
             <ProgressRing
               ratio={budgetSpent / budgetTotal}
               color={budgetLeft < 0 ? theme.expense : budgetSpent / budgetTotal > 0.85 ? theme.warning : theme.primary}
-              size={72}
-              thickness={8}>
+              size={60}
+              thickness={6}>
               <T variant="caption" style={{ fontFamily: Fonts.bold }}>
                 {formatPercent(budgetSpent / budgetTotal)}
               </T>
@@ -208,7 +204,7 @@ export default function Dashboard() {
               <T variant="caption" tone="secondary">
                 {budgetLeft >= 0 ? 'Reste à dépenser' : 'Budget dépassé de'}
               </T>
-              <T variant="amountLarge" tone={budgetLeft < 0 ? 'expense' : 'default'} style={{ fontSize: 24 }}>
+              <T variant="amountLarge" tone={budgetLeft < 0 ? 'expense' : 'default'} style={{ fontSize: 20 }}>
                 {money(Math.abs(budgetLeft))}
               </T>
               <T variant="caption" tone={overBudget > 0 ? 'expense' : 'secondary'}>
@@ -231,8 +227,8 @@ export default function Dashboard() {
           <Card>
             <Row gap={Spacing.lg} style={{ flexWrap: 'wrap', justifyContent: 'center' }}>
               <DonutChart
-                size={140}
-                thickness={18}
+                size={120}
+                thickness={14}
                 data={[
                   ...topSpending.map((s) => ({ value: s.total, color: catById.get(s.categoryId)?.color ?? '#64748B' })),
                   ...(otherSpending > 0 ? [{ value: otherSpending, color: theme.textSecondary }] : []),
@@ -284,7 +280,7 @@ export default function Dashboard() {
             horizontal
             showsHorizontalScrollIndicator={false}
             style={{ marginHorizontal: -Spacing.lg }}
-            contentContainerStyle={{ paddingHorizontal: Spacing.lg, gap: Spacing.md, paddingVertical: Spacing.sm }}>
+            contentContainerStyle={{ paddingHorizontal: Spacing.lg, gap: Spacing.md, paddingVertical: Spacing.xs }}>
             {activeGoals.map((g) => {
               const needed = goalMonthlyNeeded(g, today());
               return (
@@ -293,9 +289,9 @@ export default function Dashboard() {
                   style={styles.goalCard}
                   onPress={() => router.push({ pathname: '/goal/[id]', params: { id: g.id } })}>
                   <Row style={{ justifyContent: 'space-between' }}>
-                    <CategoryIcon icon={g.icon} color={g.color} size={40} />
-                    <ProgressRing ratio={goalProgress(g)} color={g.color} size={44} thickness={5}>
-                      <T variant="caption" style={{ fontSize: 11, fontFamily: Fonts.bold }}>
+                    <CategoryIcon icon={g.icon} color={g.color} size={34} />
+                    <ProgressRing ratio={goalProgress(g)} color={g.color} size={38} thickness={4}>
+                      <T variant="caption" style={{ fontSize: 10, fontFamily: Fonts.bold }}>
                         {Math.round(goalProgress(g) * 100)}%
                       </T>
                     </ProgressRing>
@@ -311,7 +307,7 @@ export default function Dashboard() {
                   </View>
                   {needed ? (
                     <View style={[styles.goalBadge, { backgroundColor: `${g.color}1A` }]}>
-                      <T variant="caption" style={{ color: g.color, fontFamily: Fonts.semibold, fontSize: 12 }}>
+                      <T variant="caption" style={{ color: g.color, fontFamily: Fonts.semibold, fontSize: 11 }}>
                         {money(needed)} / mois
                       </T>
                     </View>
@@ -377,7 +373,7 @@ export default function Dashboard() {
           <Card style={{ paddingVertical: Spacing.xs }}>
             {recent.map((t, i) => (
               <View key={t.id}>
-                {i > 0 ? <Divider inset={58} /> : null}
+                {i > 0 ? <Divider inset={50} /> : null}
                 <TransactionRow transaction={t} category={catById.get(t.categoryId)} showDate />
               </View>
             ))}
@@ -394,13 +390,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.sm,
-    padding: Spacing.md,
+    padding: Spacing.sm + 2,
     borderRadius: Radius.md,
     backgroundColor: 'rgba(255,255,255,0.13)',
   },
-  heroStatIcon: { width: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
+  heroStatIcon: { width: 26, height: 26, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
   legendDot: { width: 10, height: 10, borderRadius: 5 },
-  goalCard: { width: 190, gap: Spacing.md },
+  goalCard: { width: 170, gap: Spacing.sm, padding: Spacing.md },
   goalBadge: { alignSelf: 'flex-start', paddingHorizontal: 10, paddingVertical: 4, borderRadius: Radius.pill },
-  insightIcon: { width: 30, height: 30, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
+  insightIcon: { width: 26, height: 26, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
 });

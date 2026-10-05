@@ -44,7 +44,7 @@ export function MonthSwitcher({
           onGradient ? { backgroundColor: 'rgba(255,255,255,0.16)' } : { backgroundColor: theme.card, boxShadow: theme.shadow },
         ]}>
         <IconButton icon="chevron-back" label="Mois précédent" size={18} color={fg} onPress={() => onChange(addMonths(month, -1))} />
-        <T variant="bodyBold" style={{ color: fg, minWidth: 116, textAlign: 'center' }}>
+        <T variant="bodyBold" style={{ color: fg, minWidth: 100, textAlign: 'center', fontSize: 13 }}>
           {formatMonth(month)}
         </T>
         <IconButton icon="chevron-forward" label="Mois suivant" size={18} color={fg} onPress={() => onChange(addMonths(month, 1))} />
@@ -219,7 +219,7 @@ export function CategoryGrid({
               },
               pressed && { opacity: 0.7 },
             ]}>
-            <CategoryIcon icon={c.icon} color={c.color} size={40} />
+            <CategoryIcon icon={c.icon} color={c.color} size={34} />
             <T
               variant="caption"
               numberOfLines={1}
@@ -284,9 +284,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: Radius.pill,
     paddingHorizontal: Spacing.xs,
-    paddingVertical: 4,
+    paddingVertical: 2,
   },
-  todayPill: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
+  todayPill: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
   dateField: {
     borderRadius: Radius.md,
     paddingHorizontal: Spacing.sm,
@@ -303,10 +303,10 @@ const styles = StyleSheet.create({
     width: '31%',
     alignItems: 'center',
     gap: Spacing.xs,
-    paddingVertical: Spacing.md,
+    paddingVertical: Spacing.sm + 2,
     paddingHorizontal: Spacing.xs,
     borderRadius: Radius.md,
-    borderWidth: 2,
+    borderWidth: 1.5,
   },
   check: {
     position: 'absolute',
@@ -318,6 +318,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  iconCell: { width: 48, height: 48, borderRadius: Radius.md, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
+  iconCell: { width: 44, height: 44, borderRadius: Radius.md, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' },
   colorCell: { width: 38, height: 38, borderRadius: 19, borderWidth: 3, alignItems: 'center', justifyContent: 'center' },
 });

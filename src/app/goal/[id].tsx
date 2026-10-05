@@ -87,7 +87,7 @@ export default function GoalDetail() {
         }}
       />
       <Card style={{ alignItems: 'center', gap: Spacing.md }}>
-        <DonutChart data={[{ value: progress, color: goal.color }, { value: 1 - progress, color: 'transparent' }]} size={170}>
+        <DonutChart data={[{ value: progress, color: goal.color }, { value: 1 - progress, color: 'transparent' }]} size={140}>
           <T variant="title">{formatPercent(progress)}</T>
           <T variant="caption" tone="secondary">
             {money(saved)}
