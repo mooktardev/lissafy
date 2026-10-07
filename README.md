@@ -14,6 +14,8 @@ Application mobile de planification financière personnelle, construite avec **E
 | **Outils** (icône en haut de l'accueil) | Situation nette, simulateur d'épargne (intérêts composés), dettes et prêts (échéancier, paiements, remboursement anticipé, stratégie avalanche), catégories, réglages                                                  |
 | **Récurrences** (Outils)                | Salaire, loyer, abonnements ajoutés automatiquement à chaque échéance (rattrapage inclus), charges et revenus fixes par mois, prochaines échéances sur l'accueil                                                       |
 
+**Protection :** verrouillage par code à 4 chiffres (empreinte salée SHA-256 dans le coffre du téléphone, jamais le code en clair), déverrouillage par empreinte digitale ou Face ID, délai de reverrouillage (aussitôt, 1 min, 5 min), attente imposée après 5 essais ratés. Rappel de sauvegarde sur l'accueil (jamais sauvegardé ou dernière sauvegarde > 30 jours). Face ID nécessite un build de développement : Expo Go sur iOS ne le prend pas en charge.
+
 **Comptes et portefeuilles :** banque, espèces, mobile money, épargne… Chaque transaction est rattachée à un compte, le solde se calcule automatiquement, les virements entre comptes ne comptent ni comme dépense ni comme revenu, et le solde peut être recalé sur un relevé. Le total des comptes entre dans la situation nette.
 
 **Objectifs et prêts reliés aux transactions :** un versement sur un objectif crée une dépense « Épargne », un retrait un revenu « Retrait d'épargne », un paiement de prêt une dépense « Remboursements ». Les deux restent synchronisés (suppression, date), et le taux d'épargne compte les versements comme de l'épargne.
@@ -76,8 +78,6 @@ Identifiants configurés dans `app.json` : `com.Lissafy.app` (iOS et Android) �
 
 ## Pistes d'évolution
 
-- Transactions récurrentes (salaire, loyer, abonnements) générées automatiquement
 - Rappels par notification (budget presque atteint, échéance d'objectif)
-- Verrouillage biométrique
 - Synchronisation cloud optionnelle (Supabase) et multi-comptes
 - Import de relevés bancaires (CSV)

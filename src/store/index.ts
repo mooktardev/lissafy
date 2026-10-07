@@ -104,7 +104,15 @@ type Actions = {
 export type AppState = AppData & Actions;
 
 export const initialData = (): AppData => ({
-  settings: { currency: "EUR", themeMode: "system" },
+  settings: {
+    currency: "EUR",
+    themeMode: "system",
+    lockEnabled: false,
+    biometricEnabled: false,
+    lockDelay: 0,
+    lastBackupAt: null,
+    backupSnoozedUntil: null,
+  },
   categories: DEFAULT_CATEGORIES,
   transactions: [],
   budgets: [],
@@ -131,6 +139,8 @@ export function normalizeData(data: Partial<AppData>): AppData {
     x.accountId && known.has(x.accountId) ? x : { ...x, accountId: fallback };
   return {
     ...merged,
+    // Les réglages ajoutés au fil des versions prennent leur valeur par défaut.
+    settings: { ...initialData().settings, ...data.settings },
     categories: withSystemCategories(merged.categories),
     accounts,
     transfers: Array.isArray(data.transfers) ? data.transfers : [],
@@ -495,10 +505,10 @@ export const useStore = create<AppState>()(
     }),
     {
       name: "Lissafy-data",
-      version: 3,
-      // v2 : catégories système ; v3 : comptes et virements.
+      version: 4,
+      // v2 : catégories système ; v3 : comptes et virements ; v4 : réglages de sécurité.
       migrate: (persisted, version) =>
-        version < 3 ? normalizeData(persisted as Partial<AppData>) : (persisted as AppData),
+        version < 4 ? normalizeData(persisted as Partial<AppData>) : (persisted as AppData),
       storage: createJSONStorage(() => storageWithLegacyFallback),
       partialize: ({
         settings,

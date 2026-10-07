@@ -16,7 +16,10 @@ import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { Fonts } from '@/constants/theme';
 import { useResolvedScheme, useTheme } from '@/hooks/use-theme';
 import { today } from '@/lib/dates';
+import { LockScreen } from '@/components/lock-screen';
+import { shouldRelock } from '@/lib/security';
 import { useStore } from '@/store';
+import { useLock } from '@/store/lock';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -41,6 +44,24 @@ function useRecurringGeneration(enabled: boolean) {
   }, [enabled]);
 }
 
+/** Reverrouille au retour au premier plan, selon le délai choisi. */
+function useAutoLock() {
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (state) => {
+      const lock = useLock.getState();
+      // Seul l'arrière-plan compte : l'invite Face ID rend l'app brièvement « inactive ».
+      if (state === 'background') {
+        lock.setBackgroundAt(Date.now());
+      } else if (state === 'active') {
+        const { lockEnabled, lockDelay } = useStore.getState().settings;
+        if (lockEnabled && shouldRelock(lock.backgroundAt, Date.now(), lockDelay)) lock.lock();
+        lock.setBackgroundAt(null);
+      }
+    });
+    return () => sub.remove();
+  }, []);
+}
+
 export default function RootLayout() {
   const hydrated = useHydrated();
   const [fontsLoaded, fontError] = useFonts({
@@ -53,6 +74,9 @@ export default function RootLayout() {
   // En cas d'échec de chargement, on continue avec la police système.
   const ready = hydrated && (fontsLoaded || fontError !== null);
   useRecurringGeneration(hydrated);
+  useAutoLock();
+  const lockEnabled = useStore((s) => s.settings.lockEnabled);
+  const unlocked = useLock((s) => s.unlocked);
   const scheme = useResolvedScheme();
   const theme = useTheme();
 
@@ -105,8 +129,10 @@ export default function RootLayout() {
         <Stack.Screen name="account/[id]" options={{ title: 'Compte' }} />
         <Stack.Screen name="account-edit" options={{ presentation: 'modal', title: 'Compte' }} />
         <Stack.Screen name="transfer" options={{ presentation: 'modal', title: 'Virement' }} />
+        <Stack.Screen name="pin-setup" options={{ presentation: 'modal', title: 'Code de verrouillage' }} />
         <Stack.Screen name="recurring-edit" options={{ presentation: 'modal', title: 'Récurrence' }} />
       </Stack>
+      {lockEnabled && !unlocked ? <LockScreen /> : null}
     </ThemeProvider>
     </KeyboardProvider>
   );

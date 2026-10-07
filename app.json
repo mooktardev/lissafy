@@ -39,7 +39,14 @@
           }
         }
       ],
-      "expo-sharing"
+      "expo-sharing",
+      "expo-secure-store",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Lissafy utilise Face ID pour déverrouiller vos données financières."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

@@ -126,7 +126,16 @@ export type Debt = {
 
 export type ThemeMode = 'system' | 'light' | 'dark';
 
+export type LockDelay = 0 | 60 | 300;
+
 export type Settings = {
   currency: string;
   themeMode: ThemeMode;
+  /** Verrouillage par code (le code lui-même est dans le coffre du téléphone). */
+  lockEnabled: boolean;
+  biometricEnabled: boolean;
+  /** Délai en arrière-plan avant reverrouillage, en secondes. */
+  lockDelay: LockDelay;
+  lastBackupAt: ISODate | null;
+  backupSnoozedUntil: ISODate | null;
 };

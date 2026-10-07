@@ -1,5 +1,6 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { useState } from "react";
+import { router } from "expo-router";
+import { useEffect, useState } from "react";
 import { Pressable, View } from "react-native";
 
 import {
@@ -14,13 +15,22 @@ import {
     SectionHeader,
     Segmented,
     T,
+    ToggleRow,
 } from "@/components/ui";
 import { Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
-import { exportData, pickBackup } from "@/lib/backup";
+import { useBackupExport } from "@/hooks/use-backup";
+import { pickBackup } from "@/lib/backup";
+import { formatDate } from "@/lib/dates";
+import {
+  authenticateWithBiometrics,
+  biometricStatus,
+  clearPin,
+  type BiometricStatus,
+} from "@/lib/security";
 import { CURRENCIES, formatMoney } from "@/lib/format";
-import type { ThemeMode } from "@/lib/types";
-import { selectData, useStore } from "@/store";
+import type { LockDelay, ThemeMode } from "@/lib/types";
+import { useStore } from "@/store";
 
 export default function Settings() {
   const theme = useTheme();
@@ -55,12 +65,18 @@ export default function Settings() {
     }
   };
 
-  const onExport = async () => {
-    try {
-      await exportData(selectData(useStore.getState()));
-    } catch (e) {
-      notify("Export impossible", e instanceof Error ? e.message : String(e));
-    }
+  const onExport = useBackupExport();
+  const lastBackupAt = useStore((s) => s.settings.lastBackupAt);
+  const { lockEnabled, biometricEnabled, lockDelay } = useStore((s) => s.settings);
+  const [bio, setBio] = useState<BiometricStatus>({ available: false, label: "" });
+  useEffect(() => {
+    biometricStatus().then(setBio);
+  }, []);
+
+  const toggleBiometrics = async (on: boolean) => {
+    // On vérifie que la biométrie fonctionne avant de l'activer.
+    if (on && !(await authenticateWithBiometrics())) return;
+    updateSettings({ biometricEnabled: on });
   };
 
   const onImport = async () => {
@@ -89,6 +105,8 @@ export default function Settings() {
         "Tout effacer",
       )
     ) {
+      // Le code est dans le coffre du téléphone, hors du store : on l'efface aussi.
+      await clearPin();
       resetAll();
     }
   };
@@ -165,6 +183,54 @@ export default function Settings() {
         />
       </Row>
 
+      <SectionHeader title="Sécurité" />
+      <Card style={{ gap: Spacing.lg }}>
+        <ToggleRow
+          label="Verrouillage par code"
+          hint="Demande un code à 4 chiffres à l’ouverture de l’application."
+          value={lockEnabled}
+          onChange={(on) =>
+            router.push({
+              pathname: "/pin-setup",
+              params: { mode: on ? "create" : "disable" },
+            })
+          }
+        />
+        {lockEnabled && bio.available ? (
+          <ToggleRow
+            label={`Déverrouiller avec ${bio.label}`}
+            value={biometricEnabled}
+            onChange={toggleBiometrics}
+          />
+        ) : null}
+        {lockEnabled ? (
+          <View style={{ gap: Spacing.sm }}>
+            <T variant="label" tone="secondary">
+              Verrouiller en arrière-plan
+            </T>
+            <Segmented<"0" | "60" | "300">
+              value={String(lockDelay) as "0" | "60" | "300"}
+              onChange={(v) => updateSettings({ lockDelay: Number(v) as LockDelay })}
+              options={[
+                { value: "0", label: "Aussitôt" },
+                { value: "60", label: "Après 1 min" },
+                { value: "300", label: "Après 5 min" },
+              ]}
+            />
+          </View>
+        ) : null}
+        {lockEnabled ? (
+          <Button
+            title="Changer le code"
+            icon="key-outline"
+            variant="ghost"
+            onPress={() =>
+              router.push({ pathname: "/pin-setup", params: { mode: "change" } })
+            }
+          />
+        ) : null}
+      </Card>
+
       <SectionHeader title="Données" />
       <Card style={{ gap: Spacing.md }}>
         <Row>
@@ -177,6 +243,18 @@ export default function Settings() {
         <T variant="caption" tone="secondary">
           {counts.t} transactions · {counts.g} objectifs · {counts.d} dettes
         </T>
+        <Row>
+          <Ionicons
+            name={lastBackupAt ? "checkmark-circle" : "alert-circle"}
+            size={16}
+            color={lastBackupAt ? theme.income : theme.warning}
+          />
+          <T variant="caption" tone={lastBackupAt ? "secondary" : "warning"}>
+            {lastBackupAt
+              ? `Dernière sauvegarde : ${formatDate(lastBackupAt)}`
+              : "Aucune sauvegarde pour l’instant"}
+          </T>
+        </Row>
         <Button
           title="Exporter (JSON)"
           icon="download-outline"

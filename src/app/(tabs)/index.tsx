@@ -24,6 +24,7 @@ import {
 } from '@/components/ui';
 import { Fonts, Radius, Spacing } from '@/constants/theme';
 import { useAccountBalances } from '@/hooks/use-accounts';
+import { useBackupExport } from '@/hooks/use-backup';
 import { useCurrency, useTheme } from '@/hooks/use-theme';
 import { ACCOUNT_TYPES } from '@/lib/accounts';
 import { addDays, currentMonth, daysInMonth, formatDayHeader, formatMonth, formatMonthShort, today } from '@/lib/dates';
@@ -40,6 +41,7 @@ import {
 } from '@/lib/finance';
 import { formatMoney, formatPercent } from '@/lib/format';
 import { occurrencesBetween } from '@/lib/recurring';
+import { backupReminder, snoozeUntil } from '@/lib/security';
 import { useStore } from '@/store';
 import { useUi } from '@/store/ui';
 
@@ -59,6 +61,11 @@ export default function Dashboard() {
   const goals = useStore((s) => s.goals);
   const recurrings = useStore((s) => s.recurrings);
   const { accounts, balances, total: accountsTotal } = useAccountBalances();
+  const { lastBackupAt, backupSnoozedUntil } = useStore((s) => s.settings);
+  const updateSettings = useStore((s) => s.updateSettings);
+  const exportBackup = useBackupExport();
+  const firstDataDate = transactions.reduce<string | null>((min, t) => (min === null || t.date < min ? t.date : min), null);
+  const reminder = backupReminder({ lastBackupAt, snoozedUntil: backupSnoozedUntil, firstDataDate, today: today() });
 
   const money = (n: number, opts?: { sign?: boolean; compact?: boolean }) => formatMoney(n, currency, opts);
   const catById = new Map(categories.map((c) => [c.id, c]));
@@ -217,6 +224,31 @@ export default function Dashboard() {
           <QuickAction icon="trending-up" label="Simuler" color="#D9822B" onPress={() => router.push('/simulator')} />
         </Row>
       </Card>
+
+      {/* Rappel de sauvegarde */}
+      {reminder.due ? (
+        <Card style={{ gap: Spacing.md, backgroundColor: theme.warningSoft, boxShadow: 'none' }}>
+          <Row gap={Spacing.md} style={{ alignItems: 'flex-start' }}>
+            <Ionicons name="cloud-upload" size={22} color={theme.warning} />
+            <View style={{ flex: 1, gap: 2 }}>
+              <T variant="bodyBold">Sauvegardez vos données</T>
+              <T variant="caption" tone="secondary">
+                {reminder.daysSince === null
+                  ? 'Aucune sauvegarde : si vous perdez ce téléphone, vos données seront perdues.'
+                  : `Dernière sauvegarde il y a ${reminder.daysSince} jours.`}
+              </T>
+            </View>
+          </Row>
+          <Row gap={Spacing.sm}>
+            <Button title="Sauvegarder" icon="download-outline" style={{ flex: 1 }} onPress={exportBackup} />
+            <Button
+              title="Plus tard"
+              variant="ghost"
+              onPress={() => updateSettings({ backupSnoozedUntil: snoozeUntil(today()) })}
+            />
+          </Row>
+        </Card>
+      ) : null}
 
       {/* Comptes */}
       <SectionHeader title={`Mes comptes · ${money(accountsTotal)}`} action="Gérer" onAction={() => router.push('/accounts')} />
