@@ -101,6 +101,10 @@ export default function RootLayout() {
         <Stack.Screen name="settings" options={{ title: 'Réglages' }} />
         <Stack.Screen name="tools" options={{ title: 'Outils' }} />
         <Stack.Screen name="recurring" options={{ title: 'Récurrences' }} />
+        <Stack.Screen name="accounts" options={{ title: 'Comptes' }} />
+        <Stack.Screen name="account/[id]" options={{ title: 'Compte' }} />
+        <Stack.Screen name="account-edit" options={{ presentation: 'modal', title: 'Compte' }} />
+        <Stack.Screen name="transfer" options={{ presentation: 'modal', title: 'Virement' }} />
         <Stack.Screen name="recurring-edit" options={{ presentation: 'modal', title: 'Récurrence' }} />
       </Stack>
     </ThemeProvider>

@@ -1,12 +1,13 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 
 import { MonthSwitcher } from '@/components/pickers';
 import { TransactionRow } from '@/components/transaction-row';
 import { Button, Card, Chip, Divider, EmptyState, Input, Row, Screen, StatTile, T } from '@/components/ui';
 import { Fonts, Spacing } from '@/constants/theme';
 import { useCurrency, useTheme } from '@/hooks/use-theme';
+import { ACCOUNT_TYPES } from '@/lib/accounts';
 import { formatDayHeader } from '@/lib/dates';
 import { monthSummary, transactionsOfMonth } from '@/lib/finance';
 import { formatMoney } from '@/lib/format';
@@ -22,6 +23,8 @@ export default function Transactions() {
   const { month, setMonth } = useUi();
   const transactions = useStore((s) => s.transactions);
   const categories = useStore((s) => s.categories);
+  const accounts = useStore((s) => s.accounts);
+  const [accountFilter, setAccountFilter] = useState<string | null>(null);
   const [filter, setFilter] = useState<Filter>('all');
   const [query, setQuery] = useState('');
 
@@ -31,6 +34,7 @@ export default function Transactions() {
 
   const list = transactionsOfMonth(transactions, month)
     .filter((t) => filter === 'all' || t.kind === filter)
+    .filter((t) => accountFilter === null || t.accountId === accountFilter)
     .filter((t) => {
       if (!q) return true;
       const name = catById.get(t.categoryId)?.name ?? '';
@@ -71,6 +75,24 @@ export default function Transactions() {
           onPress={() => setFilter('income')}
         />
       </Row>
+      {accounts.length > 1 ? (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={{ marginHorizontal: -Spacing.lg }}
+          contentContainerStyle={{ paddingHorizontal: Spacing.lg, gap: Spacing.sm }}>
+          <Chip label="Tous les comptes" icon="layers-outline" selected={accountFilter === null} onPress={() => setAccountFilter(null)} />
+          {accounts.map((a) => (
+            <Chip
+              key={a.id}
+              label={a.name}
+              icon={ACCOUNT_TYPES[a.type].icon}
+              selected={accountFilter === a.id}
+              onPress={() => setAccountFilter(accountFilter === a.id ? null : a.id)}
+            />
+          ))}
+        </ScrollView>
+      ) : null}
 
       {groups.length === 0 ? (
         <Card>

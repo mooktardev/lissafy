@@ -1,6 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Fonts, Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -14,7 +14,8 @@ import {
   monthOf,
   today,
 } from '@/lib/dates';
-import type { Category, ISODate, IconName, MonthKey } from '@/lib/types';
+import { ACCOUNT_TYPES } from '@/lib/accounts';
+import type { Account, Category, ISODate, IconName, MonthKey } from '@/lib/types';
 
 import { Button, CategoryIcon, IconButton, Row, T } from './ui';
 
@@ -185,6 +186,59 @@ export function DateField({
 }
 
 // ---------------------------------------------------------------------------
+// Comptes
+// ---------------------------------------------------------------------------
+
+export function AccountPicker({
+  accounts,
+  value,
+  onChange,
+  exclude,
+}: {
+  accounts: Account[];
+  value: string | null;
+  onChange: (id: string) => void;
+  /** Compte à masquer (ex. le compte source d'un virement). */
+  exclude?: string | null;
+}) {
+  const theme = useTheme();
+  return (
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      style={{ marginHorizontal: -Spacing.lg }}
+      contentContainerStyle={{ paddingHorizontal: Spacing.lg, gap: Spacing.sm, paddingVertical: 2 }}>
+      {accounts
+        .filter((a) => a.id !== exclude)
+        .map((a) => {
+          const selected = a.id === value;
+          return (
+            <Pressable
+              key={a.id}
+              accessibilityRole="button"
+              accessibilityState={{ selected }}
+              onPress={() => onChange(a.id)}
+              style={({ pressed }) => [
+                styles.accountChip,
+                {
+                  borderColor: selected ? a.color : 'transparent',
+                  backgroundColor: selected ? `${a.color}1A` : theme.card,
+                  boxShadow: selected ? 'none' : theme.shadow,
+                },
+                pressed && { opacity: 0.7 },
+              ]}>
+              <Ionicons name={ACCOUNT_TYPES[a.type].icon} size={16} color={a.color} />
+              <T variant="caption" style={{ fontFamily: selected ? Fonts.bold : Fonts.medium }}>
+                {a.name}
+              </T>
+            </Pressable>
+          );
+        })}
+    </ScrollView>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Catégories, icônes, couleurs
 // ---------------------------------------------------------------------------
 
@@ -306,6 +360,15 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm + 2,
     paddingHorizontal: Spacing.xs,
     borderRadius: Radius.md,
+    borderWidth: 1.5,
+  },
+  accountChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 9,
+    paddingHorizontal: 14,
+    borderRadius: Radius.pill,
     borderWidth: 1.5,
   },
   check: {

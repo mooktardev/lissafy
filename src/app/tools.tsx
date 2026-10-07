@@ -4,6 +4,7 @@ import { View } from 'react-native';
 
 import { Card, CategoryIcon, GradientCard, Row, Screen, SectionHeader, StatTile, T } from '@/components/ui';
 import { Spacing } from '@/constants/theme';
+import { useAccountBalances } from '@/hooks/use-accounts';
 import { useCurrency, useTheme } from '@/hooks/use-theme';
 import { debtBalance, goalSaved } from '@/lib/finance';
 import { formatMoney } from '@/lib/format';
@@ -36,27 +37,36 @@ export default function Tools() {
   const debts = useStore((s) => s.debts);
   const categories = useStore((s) => s.categories);
   const recurringCount = useStore((s) => s.recurrings.filter((r) => r.active).length);
+  const { accounts, total: accountsTotal } = useAccountBalances();
 
   const savings = goals.reduce((a, g) => a + goalSaved(g), 0);
   const totalDebt = debts.reduce((a, d) => a + debtBalance(d), 0);
-  const net = savings - totalDebt;
+  const net = accountsTotal + savings - totalDebt;
 
   return (
     <Screen>
       <GradientCard colors={NET_GRADIENT} style={{ gap: Spacing.xs, boxShadow: '0px 4px 12px rgba(17, 20, 40, 0.2)' }}>
         <T variant="caption" tone="inverse" style={{ opacity: 0.8 }}>
-          Situation nette (épargne − dettes)
+          Situation nette (comptes + épargne − dettes)
         </T>
         <T variant="hero" style={{ color: net < 0 ? '#FFB4B6' : '#7CF5C4' }} numberOfLines={1} adjustsFontSizeToFit>
           {formatMoney(net, currency, { sign: true })}
         </T>
       </GradientCard>
       <Row gap={Spacing.md}>
+        <StatTile label="Comptes" value={formatMoney(accountsTotal, currency)} icon="business" />
         <StatTile label="Épargne" value={formatMoney(savings, currency)} tone="income" icon="wallet" />
         <StatTile label="Dettes" value={formatMoney(totalDebt, currency)} tone="expense" icon="card" />
       </Row>
 
       <SectionHeader title="Planification" />
+      <ToolCard
+        icon="business"
+        color="#0284C7"
+        title="Comptes et virements"
+        subtitle={`${accounts.length} compte${accounts.length > 1 ? 's' : ''} · banque, espèces, mobile money…`}
+        href="/accounts"
+      />
       <ToolCard
         icon="repeat"
         color="#34C924"

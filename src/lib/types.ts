@@ -30,6 +30,31 @@ export type Transaction = {
   recurringId?: string;
   /** Mouvement d'objectif ou paiement de dette à l'origine de cette transaction. */
   link?: TransactionLink;
+  /** Compte débité ou crédité (absent sur les données antérieures aux comptes). */
+  accountId?: string;
+};
+
+export type AccountType = 'bank' | 'cash' | 'mobile' | 'savings' | 'other';
+
+/** Compte ou portefeuille : banque, espèces, mobile money… */
+export type Account = {
+  id: string;
+  name: string;
+  type: AccountType;
+  color: string;
+  /** Solde au moment de la création ; le solde courant en découle. */
+  initialBalance: number;
+  createdAt: ISODate;
+};
+
+/** Virement entre deux comptes : ni dépense ni revenu. */
+export type Transfer = {
+  id: string;
+  fromAccountId: string;
+  toAccountId: string;
+  amount: number;
+  date: ISODate;
+  note: string;
 };
 
 export type TransactionLink =
@@ -52,6 +77,7 @@ export type Recurring = {
   /** Date de la dernière échéance déjà transformée en transaction. */
   lastGenerated: ISODate | null;
   active: boolean;
+  accountId?: string;
 };
 
 /** Plafond mensuel récurrent pour une catégorie de dépenses. */

@@ -3,7 +3,7 @@ import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Platform, StyleSheet, TextInput, View, type TextStyle } from 'react-native';
 
-import { CategoryGrid, DateField } from '@/components/pickers';
+import { AccountPicker, CategoryGrid, DateField } from '@/components/pickers';
 import { Button, Card, Chip, confirm, Field, Input, Row, Screen, Segmented, T } from '@/components/ui';
 import { Fonts, Spacing } from '@/constants/theme';
 import { useCurrency, useTheme } from '@/hooks/use-theme';
@@ -18,9 +18,12 @@ import { useUi } from '@/store/ui';
 export default function TransactionForm() {
   const theme = useTheme();
   const currency = useCurrency();
-  const params = useLocalSearchParams<{ id?: string; kind?: TransactionKind }>();
+  const params = useLocalSearchParams<{ id?: string; kind?: TransactionKind; accountId?: string }>();
   const existing = useStore((s) => s.transactions.find((t) => t.id === params.id));
   const categories = useStore((s) => s.categories);
+  const accounts = useStore((s) => s.accounts);
+  const lastAccountId = useUi((s) => s.lastAccountId);
+  const setLastAccountId = useUi((s) => s.setLastAccountId);
   const saveTransaction = useStore((s) => s.saveTransaction);
   const deleteTransaction = useStore((s) => s.deleteTransaction);
   const saveRecurring = useStore((s) => s.saveRecurring);
@@ -39,6 +42,11 @@ export default function TransactionForm() {
   const [date, setDate] = useState<ISODate>(existing?.date ?? (month === currentMonth() ? today() : `${month}-01`));
   const [note, setNote] = useState(existing?.note ?? '');
   const [repeat, setRepeat] = useState<Frequency | 'none'>('none');
+  const [accountId, setAccountId] = useState<string | null>(
+    existing?.accountId ?? params.accountId ?? lastAccountId ?? accounts[0]?.id ?? null,
+  );
+  // Compte supprimé entre-temps : on retombe sur le premier.
+  const effectiveAccount = accounts.some((a) => a.id === accountId) ? accountId : (accounts[0]?.id ?? null);
 
   // Les catégories automatiques (Épargne, Remboursements…) ne se choisissent pas à la main.
   const available = categories.filter(
@@ -53,7 +61,8 @@ export default function TransactionForm() {
 
   const save = () => {
     if (!valid || !effectiveCategory) return;
-    const base = { kind, amount: value, categoryId: effectiveCategory, note: note.trim() };
+    const base = { kind, amount: value, categoryId: effectiveCategory, note: note.trim(), accountId: effectiveAccount ?? undefined };
+    if (effectiveAccount) setLastAccountId(effectiveAccount);
     if (!existing && repeat !== 'none') {
       // Cette transaction est la première échéance ; les suivantes seront créées automatiquement.
       const ruleId = saveRecurring({
@@ -150,6 +159,12 @@ export default function TransactionForm() {
           <CategoryGrid categories={available} value={effectiveCategory} onChange={setCategoryId} />
         </Field>
       )}
+
+      {accounts.length > 1 ? (
+        <Field label="Compte">
+          <AccountPicker accounts={accounts} value={effectiveAccount} onChange={setAccountId} />
+        </Field>
+      ) : null}
 
       <Field label="Date">
         <Row>

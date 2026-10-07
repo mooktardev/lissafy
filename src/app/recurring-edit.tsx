@@ -2,7 +2,7 @@ import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
 
-import { CategoryGrid, DateField } from '@/components/pickers';
+import { AccountPicker, CategoryGrid, DateField } from '@/components/pickers';
 import { AmountInput, Button, Chip, confirm, Field, Input, Row, Screen, Segmented } from '@/components/ui';
 import { Spacing } from '@/constants/theme';
 import { useCurrency, useTheme } from '@/hooks/use-theme';
@@ -21,6 +21,7 @@ export default function RecurringEdit() {
   const { id } = useLocalSearchParams<{ id?: string }>();
   const existing = useStore((s) => s.recurrings.find((r) => r.id === id));
   const categories = useStore((s) => s.categories);
+  const accounts = useStore((s) => s.accounts);
   const saveRecurring = useStore((s) => s.saveRecurring);
   const deleteRecurring = useStore((s) => s.deleteRecurring);
   const applyRecurring = useStore((s) => s.applyRecurring);
@@ -33,6 +34,8 @@ export default function RecurringEdit() {
   const [endDate, setEndDate] = useState<ISODate | null>(existing?.endDate ?? null);
   const [note, setNote] = useState(existing?.note ?? '');
   const [active, setActive] = useState(existing?.active ?? true);
+  const [accountId, setAccountId] = useState<string | null>(existing?.accountId ?? accounts[0]?.id ?? null);
+  const effectiveAccount = accounts.some((a) => a.id === accountId) ? accountId : (accounts[0]?.id ?? null);
 
   const available = categories.filter((c) => c.kind === kind && (!isSystemCategory(c.id) || c.id === existing?.categoryId));
   const effectiveCategory = available.some((c) => c.id === categoryId) ? categoryId : null;
@@ -52,6 +55,7 @@ export default function RecurringEdit() {
       startDate,
       endDate,
       active,
+      accountId: effectiveAccount ?? undefined,
       // Reprise après une pause : on ne rattrape pas les échéances de la période en pause.
       ...(existing && !existing.active && active
         ? { lastGenerated: maxDate(existing.lastGenerated, addDays(today(), -1)) }
@@ -89,6 +93,11 @@ export default function RecurringEdit() {
       <Field label="Catégorie">
         <CategoryGrid categories={available} value={effectiveCategory} onChange={setCategoryId} />
       </Field>
+      {accounts.length > 1 ? (
+        <Field label="Compte">
+          <AccountPicker accounts={accounts} value={effectiveAccount} onChange={setAccountId} />
+        </Field>
+      ) : null}
       <Field label="Fréquence" hint={`Ajoutée automatiquement ${describeSchedule(frequency, startDate)}.`}>
         <Row style={{ flexWrap: 'wrap' }}>
           {(Object.keys(FREQUENCY_LABELS) as Frequency[]).map((f) => (

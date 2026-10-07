@@ -14,6 +14,8 @@ Application mobile de planification financière personnelle, construite avec **E
 | **Outils** (icône en haut de l'accueil) | Situation nette, simulateur d'épargne (intérêts composés), dettes et prêts (échéancier, paiements, remboursement anticipé, stratégie avalanche), catégories, réglages                                                  |
 | **Récurrences** (Outils)                | Salaire, loyer, abonnements ajoutés automatiquement à chaque échéance (rattrapage inclus), charges et revenus fixes par mois, prochaines échéances sur l'accueil                                                       |
 
+**Comptes et portefeuilles :** banque, espèces, mobile money, épargne… Chaque transaction est rattachée à un compte, le solde se calcule automatiquement, les virements entre comptes ne comptent ni comme dépense ni comme revenu, et le solde peut être recalé sur un relevé. Le total des comptes entre dans la situation nette.
+
 **Objectifs et prêts reliés aux transactions :** un versement sur un objectif crée une dépense « Épargne », un retrait un revenu « Retrait d'épargne », un paiement de prêt une dépense « Remboursements ». Les deux restent synchronisés (suppression, date), et le taux d'épargne compte les versements comme de l'épargne.
 
 **Design :** police Plus Jakarta Sans, cartes en dégradé, ombres douces, thème clair et sombre soignés.

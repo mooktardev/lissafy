@@ -23,7 +23,9 @@ import {
   T,
 } from '@/components/ui';
 import { Fonts, Radius, Spacing } from '@/constants/theme';
+import { useAccountBalances } from '@/hooks/use-accounts';
 import { useCurrency, useTheme } from '@/hooks/use-theme';
+import { ACCOUNT_TYPES } from '@/lib/accounts';
 import { addDays, currentMonth, daysInMonth, formatDayHeader, formatMonth, formatMonthShort, today } from '@/lib/dates';
 import {
   averageMonthlyNet,
@@ -56,6 +58,7 @@ export default function Dashboard() {
   const budgets = useStore((s) => s.budgets);
   const goals = useStore((s) => s.goals);
   const recurrings = useStore((s) => s.recurrings);
+  const { accounts, balances, total: accountsTotal } = useAccountBalances();
 
   const money = (n: number, opts?: { sign?: boolean; compact?: boolean }) => formatMoney(n, currency, opts);
   const catById = new Map(categories.map((c) => [c.id, c]));
@@ -214,6 +217,38 @@ export default function Dashboard() {
           <QuickAction icon="trending-up" label="Simuler" color="#D9822B" onPress={() => router.push('/simulator')} />
         </Row>
       </Card>
+
+      {/* Comptes */}
+      <SectionHeader title={`Mes comptes · ${money(accountsTotal)}`} action="Gérer" onAction={() => router.push('/accounts')} />
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={{ marginHorizontal: -Spacing.lg }}
+        contentContainerStyle={{ paddingHorizontal: Spacing.lg, gap: Spacing.md, paddingVertical: Spacing.xs }}>
+        {accounts.map((a) => {
+          const balance = balances.get(a.id) ?? 0;
+          return (
+            <Card
+              key={a.id}
+              style={styles.accountCard}
+              onPress={() => router.push({ pathname: '/account/[id]', params: { id: a.id } })}>
+              <CategoryIcon icon={ACCOUNT_TYPES[a.type].icon} color={a.color} size={32} />
+              <T variant="caption" tone="secondary" numberOfLines={1}>
+                {a.name}
+              </T>
+              <T variant="amount" tone={balance < 0 ? 'expense' : 'default'} numberOfLines={1} adjustsFontSizeToFit>
+                {money(balance)}
+              </T>
+            </Card>
+          );
+        })}
+        <Card style={[styles.accountCard, { justifyContent: 'center', alignItems: 'center' }]} onPress={() => router.push('/account-edit')}>
+          <CategoryIcon icon="add" color={theme.primaryText} size={32} />
+          <T variant="caption" tone="primary" style={{ fontFamily: Fonts.semibold }}>
+            Ajouter
+          </T>
+        </Card>
+      </ScrollView>
 
       {transactions.length === 0 ? (
         <Card>
@@ -487,6 +522,7 @@ const styles = StyleSheet.create({
   heroStatIcon: { width: 26, height: 26, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
   legendDot: { width: 10, height: 10, borderRadius: 5 },
   goalCard: { width: 170, gap: Spacing.sm, padding: Spacing.md },
+  accountCard: { width: 140, gap: Spacing.xs, padding: Spacing.md },
   goalBadge: { alignSelf: 'flex-start', paddingHorizontal: 10, paddingVertical: 4, borderRadius: Radius.pill },
   insightIcon: { width: 26, height: 26, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
 });

@@ -6,8 +6,10 @@ import { today } from "@/lib/dates";
 import { DEFAULT_CATEGORIES, SYSTEM_CATEGORIES, SYSTEM_CATEGORY_IDS } from "@/lib/defaults";
 import { debtBalance, monthlyInterest, round2 } from "@/lib/finance";
 import { newId } from "@/lib/format";
+import { defaultAccount } from "@/lib/accounts";
 import { dueOccurrences } from "@/lib/recurring";
 import type {
+    Account,
     Budget,
     Category,
     Contribution,
@@ -17,6 +19,7 @@ import type {
     Recurring,
     Settings,
     Transaction,
+    Transfer,
 } from "@/lib/types";
 
 export type AppData = {
@@ -27,6 +30,8 @@ export type AppData = {
   goals: Goal[];
   debts: Debt[];
   recurrings: Recurring[];
+  accounts: Account[];
+  transfers: Transfer[];
 };
 
 type Actions = {
@@ -83,6 +88,12 @@ type Actions = {
   ) => string;
   /** Supprime la règle ; les transactions déjà créées sont conservées. */
   deleteRecurring: (id: string) => void;
+
+  saveAccount: (a: Omit<Account, "id" | "createdAt"> & { id?: string }) => string;
+  /** Supprime un compte et rattache ses transactions et virements à `fallbackId`. */
+  deleteAccount: (id: string, fallbackId: string) => void;
+  saveTransfer: (t: Omit<Transfer, "id"> & { id?: string }) => void;
+  deleteTransfer: (id: string) => void;
   /** Crée les transactions des échéances arrivées jusqu'à `date` incluse. */
   applyRecurring: (date: ISODate) => void;
 
@@ -100,7 +111,33 @@ export const initialData = (): AppData => ({
   goals: [],
   debts: [],
   recurrings: [],
+  accounts: [defaultAccount(today())],
+  transfers: [],
 });
+
+/**
+ * Met des données anciennes ou importées au format courant : catégories
+ * système, compte par défaut, transactions et récurrences rattachées à un compte.
+ */
+export function normalizeData(data: Partial<AppData>): AppData {
+  const merged: AppData = { ...initialData(), ...data };
+  const accounts =
+    Array.isArray(data.accounts) && data.accounts.length > 0
+      ? data.accounts
+      : [defaultAccount(today())];
+  const fallback = accounts[0].id;
+  const known = new Set(accounts.map((a) => a.id));
+  const attach = <T extends { accountId?: string }>(x: T): T =>
+    x.accountId && known.has(x.accountId) ? x : { ...x, accountId: fallback };
+  return {
+    ...merged,
+    categories: withSystemCategories(merged.categories),
+    accounts,
+    transfers: Array.isArray(data.transfers) ? data.transfers : [],
+    transactions: merged.transactions.map(attach),
+    recurrings: merged.recurrings.map(attach),
+  };
+}
 
 /** Ajoute les catégories système manquantes (données antérieures à leur création). */
 export function withSystemCategories(categories: Category[]): Category[] {
@@ -277,6 +314,7 @@ export const useStore = create<AppState>()(
                   date,
                   note: goal.name,
                   link: { type: "goal", goalId, contributionId: c.id },
+                  accountId: s.accounts[0]?.id,
                 },
               ]
             : [];
@@ -342,6 +380,7 @@ export const useStore = create<AppState>()(
                   date,
                   note: debt.name,
                   link: { type: "debt", debtId, paymentId: payment.id },
+                  accountId: s.accounts[0]?.id,
                 },
               ]
             : [];
@@ -401,6 +440,7 @@ export const useStore = create<AppState>()(
                 kind: r.kind,
                 amount: r.amount,
                 categoryId: r.categoryId,
+                accountId: r.accountId ?? s.accounts[0]?.id,
                 note: r.note,
                 date: d,
                 recurringId: r.id,
@@ -412,23 +452,53 @@ export const useStore = create<AppState>()(
           return { recurrings, transactions: [...s.transactions, ...created] };
         }),
 
-      importData: (data) => {
-        const merged = { ...initialData(), ...data };
-        set({ ...merged, categories: withSystemCategories(merged.categories) });
+      saveAccount: ({ id, ...rest }) => {
+        const accountId = id ?? newId();
+        set((s) => {
+          const existing = s.accounts.find((a) => a.id === accountId);
+          const account: Account = {
+            createdAt: existing?.createdAt ?? today(),
+            ...rest,
+            id: accountId,
+          };
+          return { accounts: upsert(s.accounts, account) };
+        });
+        return accountId;
       },
+      deleteAccount: (id, fallbackId) =>
+        set((s) => {
+          const move = <T extends { accountId?: string }>(x: T): T =>
+            x.accountId === id ? { ...x, accountId: fallbackId } : x;
+          return {
+            accounts: s.accounts.filter((a) => a.id !== id),
+            transactions: s.transactions.map(move),
+            recurrings: s.recurrings.map(move),
+            // Un virement vers le compte de repli devient sans objet.
+            transfers: s.transfers
+              .map((t) => ({
+                ...t,
+                fromAccountId: t.fromAccountId === id ? fallbackId : t.fromAccountId,
+                toAccountId: t.toAccountId === id ? fallbackId : t.toAccountId,
+              }))
+              .filter((t) => t.fromAccountId !== t.toAccountId),
+          };
+        }),
+      saveTransfer: ({ id, ...rest }) =>
+        set((s) => ({
+          transfers: upsert(s.transfers, { id: id ?? newId(), ...rest }),
+        })),
+      deleteTransfer: (id) =>
+        set((s) => ({ transfers: s.transfers.filter((t) => t.id !== id) })),
+
+      importData: (data) => set(normalizeData(data)),
       resetAll: () => set(initialData()),
     }),
     {
       name: "Lissafy-data",
-      version: 2,
-      // v2 : catégories système (Épargne, Remboursements, Retrait d'épargne).
-      migrate: (persisted, version) => {
-        const state = persisted as AppData;
-        if (version < 2 && Array.isArray(state?.categories)) {
-          return { ...state, categories: withSystemCategories(state.categories) };
-        }
-        return state;
-      },
+      version: 3,
+      // v2 : catégories système ; v3 : comptes et virements.
+      migrate: (persisted, version) =>
+        version < 3 ? normalizeData(persisted as Partial<AppData>) : (persisted as AppData),
       storage: createJSONStorage(() => storageWithLegacyFallback),
       partialize: ({
         settings,
@@ -438,6 +508,8 @@ export const useStore = create<AppState>()(
         goals,
         debts,
         recurrings,
+        accounts,
+        transfers,
       }): AppData => ({
         settings,
         categories,
@@ -446,14 +518,25 @@ export const useStore = create<AppState>()(
         goals,
         debts,
         recurrings,
+        accounts,
+        transfers,
       }),
     },
   ),
 );
 
 export function selectData(s: AppState): AppData {
-  const { settings, categories, transactions, budgets, goals, debts, recurrings } =
-    s;
+  const {
+    settings,
+    categories,
+    transactions,
+    budgets,
+    goals,
+    debts,
+    recurrings,
+    accounts,
+    transfers,
+  } = s;
   return {
     settings,
     categories,
@@ -462,6 +545,8 @@ export function selectData(s: AppState): AppData {
     goals,
     debts,
     recurrings,
+    accounts,
+    transfers,
   };
 }
 
