@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { addMonths, isValidISODate, monthsBetween } from '../dates';
+import { addMonths, formatDate, isValidISODate, monthsBetween } from '../dates';
 import {
   amortizationSchedule,
   averageMonthlyNet,
@@ -26,6 +26,11 @@ const tx = (date: string, kind: Transaction['kind'], amount: number, categoryId 
 });
 
 describe('dates', () => {
+  it('écrit « 1er » pour le premier du mois', () => {
+    expect(formatDate('2026-11-01')).toBe('1er novembre 2026');
+    expect(formatDate('2026-11-02')).toBe('2 novembre 2026');
+  });
+
   it('ajoute des mois en franchissant les années', () => {
     expect(addMonths('2026-11', 3)).toBe('2027-02');
     expect(addMonths('2026-01', -1)).toBe('2025-12');

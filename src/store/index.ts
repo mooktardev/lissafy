@@ -112,6 +112,7 @@ export const initialData = (): AppData => ({
     lockDelay: 0,
     lastBackupAt: null,
     backupSnoozedUntil: null,
+    onboarded: false,
   },
   categories: DEFAULT_CATEGORIES,
   transactions: [],
@@ -127,6 +128,12 @@ export const initialData = (): AppData => ({
  * Met des données anciennes ou importées au format courant : catégories
  * système, compte par défaut, transactions et récurrences rattachées à un compte.
  */
+function hasUserData(data: Partial<AppData>): boolean {
+  return [data.transactions, data.goals, data.debts, data.recurrings, data.budgets].some(
+    (list) => Array.isArray(list) && list.length > 0,
+  );
+}
+
 export function normalizeData(data: Partial<AppData>): AppData {
   const merged: AppData = { ...initialData(), ...data };
   const accounts =
@@ -140,7 +147,12 @@ export function normalizeData(data: Partial<AppData>): AppData {
   return {
     ...merged,
     // Les réglages ajoutés au fil des versions prennent leur valeur par défaut.
-    settings: { ...initialData().settings, ...data.settings },
+    settings: {
+      ...initialData().settings,
+      ...data.settings,
+      // Données existantes : l'utilisateur n'a pas besoin de l'introduction.
+      onboarded: data.settings?.onboarded ?? hasUserData(data),
+    },
     categories: withSystemCategories(merged.categories),
     accounts,
     transfers: Array.isArray(data.transfers) ? data.transfers : [],
@@ -505,10 +517,10 @@ export const useStore = create<AppState>()(
     }),
     {
       name: "Lissafy-data",
-      version: 4,
-      // v2 : catégories système ; v3 : comptes et virements ; v4 : réglages de sécurité.
+      version: 5,
+      // v2 : catégories système ; v3 : comptes ; v4 : sécurité ; v5 : introduction.
       migrate: (persisted, version) =>
-        version < 4 ? normalizeData(persisted as Partial<AppData>) : (persisted as AppData),
+        version < 5 ? normalizeData(persisted as Partial<AppData>) : (persisted as AppData),
       storage: createJSONStorage(() => storageWithLegacyFallback),
       partialize: ({
         settings,

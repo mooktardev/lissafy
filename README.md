@@ -14,6 +14,8 @@ Application mobile de planification financière personnelle, construite avec **E
 | **Outils** (icône en haut de l'accueil) | Situation nette, simulateur d'épargne (intérêts composés), dettes et prêts (échéancier, paiements, remboursement anticipé, stratégie avalanche), catégories, réglages                                                  |
 | **Récurrences** (Outils)                | Salaire, loyer, abonnements ajoutés automatiquement à chaque échéance (rattrapage inclus), charges et revenus fixes par mois, prochaines échéances sur l'accueil                                                       |
 
+**Premier lancement guidé :** devise, revenu mensuel (avec salaire ajouté automatiquement chaque mois), compte principal et son solde, budgets proposés selon la règle 50 / 30 / 20 (besoins, envies, épargne) et objectif « Fonds d'urgence » de 3 mois de dépenses essentielles. Chaque étape peut être passée ; les utilisateurs existants ne la voient pas.
+
 **Protection :** verrouillage par code à 4 chiffres (empreinte salée SHA-256 dans le coffre du téléphone, jamais le code en clair), déverrouillage par empreinte digitale ou Face ID, délai de reverrouillage (aussitôt, 1 min, 5 min), attente imposée après 5 essais ratés. Rappel de sauvegarde sur l'accueil (jamais sauvegardé ou dernière sauvegarde > 30 jours). Face ID nécessite un build de développement : Expo Go sur iOS ne le prend pas en charge.
 
 **Comptes et portefeuilles :** banque, espèces, mobile money, épargne… Chaque transaction est rattachée à un compte, le solde se calcule automatiquement, les virements entre comptes ne comptent ni comme dépense ni comme revenu, et le solde peut être recalé sur un relevé. Le total des comptes entre dans la situation nette.

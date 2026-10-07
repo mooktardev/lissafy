@@ -375,6 +375,8 @@ export function Chip({
   const selectedText = color ? '#FFFFFF' : theme.onPrimary;
   return (
     <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ selected }}
       onPress={onPress}
       style={({ pressed }) => [
         styles.chip,

@@ -76,6 +76,7 @@ export default function RootLayout() {
   useRecurringGeneration(hydrated);
   useAutoLock();
   const lockEnabled = useStore((s) => s.settings.lockEnabled);
+  const onboarded = useStore((s) => s.settings.onboarded);
   const unlocked = useLock((s) => s.unlocked);
   const scheme = useResolvedScheme();
   const theme = useTheme();
@@ -112,6 +113,11 @@ export default function RootLayout() {
           headerTitleStyle: { fontFamily: Fonts.bold, fontSize: 16, color: theme.text },
           contentStyle: { backgroundColor: theme.background },
         }}>
+        {/* Tant que l'introduction n'est pas faite, seul l'écran d'accueil guidé est accessible. */}
+        <Stack.Protected guard={!onboarded}>
+          <Stack.Screen name="onboarding" options={{ headerShown: false, gestureEnabled: false }} />
+        </Stack.Protected>
+        <Stack.Protected guard={onboarded}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="transaction" options={{ presentation: 'modal', title: 'Transaction' }} />
         <Stack.Screen name="goal-edit" options={{ presentation: 'modal', title: 'Objectif' }} />
@@ -129,8 +135,9 @@ export default function RootLayout() {
         <Stack.Screen name="account/[id]" options={{ title: 'Compte' }} />
         <Stack.Screen name="account-edit" options={{ presentation: 'modal', title: 'Compte' }} />
         <Stack.Screen name="transfer" options={{ presentation: 'modal', title: 'Virement' }} />
-        <Stack.Screen name="pin-setup" options={{ presentation: 'modal', title: 'Code de verrouillage' }} />
         <Stack.Screen name="recurring-edit" options={{ presentation: 'modal', title: 'Récurrence' }} />
+        </Stack.Protected>
+        <Stack.Screen name="pin-setup" options={{ presentation: 'modal', title: 'Code de verrouillage' }} />
       </Stack>
       {lockEnabled && !unlocked ? <LockScreen /> : null}
     </ThemeProvider>

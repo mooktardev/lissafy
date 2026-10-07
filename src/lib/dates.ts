@@ -81,9 +81,12 @@ export function formatMonthShort(m: MonthKey): string {
   return MONTHS_SHORT[mo - 1];
 }
 
+/** « 1er » pour le premier du mois, comme le veut l'usage français. */
+const dayLabel = (d: Date) => (d.getDate() === 1 ? '1er' : String(d.getDate()));
+
 export function formatDate(s: ISODate): string {
   const d = parseISODate(s);
-  return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+  return `${dayLabel(d)} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
 }
 
 export function formatDayHeader(s: ISODate): string {
@@ -93,7 +96,7 @@ export function formatDayHeader(s: ISODate): string {
   if (s === addDays(t, 1)) return 'Demain';
   const d = parseISODate(s);
   const wd = WEEKDAYS[d.getDay()];
-  return `${wd.charAt(0).toUpperCase()}${wd.slice(1)} ${d.getDate()} ${MONTHS[d.getMonth()]}`;
+  return `${wd.charAt(0).toUpperCase()}${wd.slice(1)} ${dayLabel(d)} ${MONTHS[d.getMonth()]}`;
 }
 
 export { MONTHS };

@@ -138,4 +138,6 @@ export type Settings = {
   lockDelay: LockDelay;
   lastBackupAt: ISODate | null;
   backupSnoozedUntil: ISODate | null;
+  /** Premier lancement guidé terminé (ou passé). */
+  onboarded: boolean;
 };
