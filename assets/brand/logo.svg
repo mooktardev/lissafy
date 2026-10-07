@@ -1,0 +1,10 @@
+<!--
+  Logo Lissafy (portefeuille), sur une grille 100 × 100.
+  Dessiné en currentColor : `npm run icons` lui applique les couleurs de la marque
+  et génère toutes les icônes et l'écran de démarrage à partir de ce fichier.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <path d="M28 30 L58 17 L64 30" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="17" y="30" width="66" height="48" rx="12" fill="none" stroke="currentColor" stroke-width="9"/>
+  <path d="M84 46 H64 a8 8 0 0 0 0 16 H84 Z" fill="currentColor"/>
+</svg>

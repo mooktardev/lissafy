@@ -68,6 +68,16 @@ src/
 - **Graphiques** : composants SVG maison (`react-native-svg`), sans bibliothèque lourde.
 - **Calculs** : toute la logique financière est dans `src/lib/finance.ts`, sans dépendance à React, et couverte par `src/lib/__tests__/finance.test.ts`.
 
+## Icône et écran de démarrage
+
+Tout part d'un seul fichier : `assets/brand/logo.svg` (le portefeuille, dessiné en `currentColor`). Pour régénérer l'icône iOS / stores, l'icône adaptative Android (avant-plan, fond, monochrome), l'image de démarrage et le favicon :
+
+```bash
+npm run icons
+```
+
+Les couleurs (vert pomme `#34C924`, logo `#0B2A06`) sont définies en tête de `scripts/generate-icons.mjs`. Les images de `assets/images/` sont générées : modifiez le logo source plutôt que ces fichiers.
+
 ## Construire l'application
 
 Avec [EAS Build](https://docs.expo.dev/build/introduction/) :
