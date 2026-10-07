@@ -76,7 +76,7 @@ Avec [EAS Build](https://docs.expo.dev/build/introduction/) :
 npx eas-cli@latest build --platform android --profile preview
 ```
 
-Identifiants configurés dans `app.json` : `com.Lissafy.app` (iOS et Android) — à adapter avant publication.
+Identifiant de l’application (iOS et Android) : `com.mooktardev.lissafy`. Il ne doit plus changer une fois l’app publiée.
 
 ## Pistes d'évolution
 

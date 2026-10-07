@@ -1,15 +1,15 @@
 {
   "expo": {
     "name": "Lissafy",
-    "slug": "Lissafy",
+    "slug": "lissafy",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "Lissafy",
+    "scheme": "lissafy",
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon",
-      "bundleIdentifier": "com.Lissafy.app",
+      "bundleIdentifier": "com.mooktardev.lissafy",
       "supportsTablet": true
     },
     "android": {
@@ -20,7 +20,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.Lissafy.app"
+      "package": "com.mooktardev.lissafy"
     },
     "web": {
       "output": "single",
