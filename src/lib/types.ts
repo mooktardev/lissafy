@@ -28,7 +28,13 @@ export type Transaction = {
   note: string;
   /** Règle de récurrence ayant généré cette transaction. */
   recurringId?: string;
+  /** Mouvement d'objectif ou paiement de dette à l'origine de cette transaction. */
+  link?: TransactionLink;
 };
+
+export type TransactionLink =
+  | { type: 'goal'; goalId: string; contributionId: string }
+  | { type: 'debt'; debtId: string; paymentId: string };
 
 export type Frequency = 'weekly' | 'monthly' | 'yearly';
 

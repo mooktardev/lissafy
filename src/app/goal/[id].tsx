@@ -16,6 +16,7 @@ import {
   Row,
   Screen,
   Segmented,
+  ToggleRow,
   SectionHeader,
   StatTile,
   T,
@@ -40,6 +41,7 @@ export default function GoalDetail() {
   const [mode, setMode] = useState<'deposit' | 'withdraw'>('deposit');
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState<ISODate>(today());
+  const [record, setRecord] = useState(true);
 
   if (!goal) {
     return (
@@ -59,12 +61,12 @@ export default function GoalDetail() {
 
   const submit = () => {
     if (!valid) return;
-    addContribution(goal.id, mode === 'deposit' ? value : -value, date);
+    addContribution(goal.id, mode === 'deposit' ? value : -value, date, record);
     setAmount('');
   };
 
   const remove = async () => {
-    if (await confirm(`Supprimer « ${goal.name} » ?`, 'L’objectif et son historique seront supprimés.')) {
+    if (await confirm(`Supprimer « ${goal.name} » ?`, 'L’objectif et son historique seront supprimés. Les transactions déjà enregistrées restent dans votre activité.')) {
       deleteGoal(goal.id);
       router.back();
     }
@@ -129,6 +131,12 @@ export default function GoalDetail() {
         <Field label="Date">
           <DateField value={date} onChange={(d) => d && setDate(d)} />
         </Field>
+        <ToggleRow
+          label="Enregistrer dans mes transactions"
+          hint={record ? mode === 'deposit' ? 'Ajoute une dépense « Épargne » : l’argent quitte votre compte courant.' : 'Ajoute un revenu « Retrait d’épargne » : l’argent revient sur votre compte.' : 'Mouvement enregistré uniquement sur l’objectif (argent déjà mis de côté).'}
+          value={record}
+          onChange={setRecord}
+        />
         <Button title={mode === 'deposit' ? 'Ajouter le versement' : 'Enregistrer le retrait'} icon="add" onPress={submit} disabled={!valid} />
       </Card>
 
@@ -150,7 +158,7 @@ export default function GoalDetail() {
                     size={18}
                     color={theme.textSecondary}
                     onPress={async () => {
-                      if (await confirm('Supprimer ce mouvement ?', `${money(c.amount, true)} le ${formatDate(c.date)}`)) {
+                      if (await confirm('Supprimer ce mouvement ?', `${money(c.amount, true)} le ${formatDate(c.date)}. La transaction associée sera aussi supprimée.`)) {
                         deleteContribution(goal.id, c.id);
                       }
                     }}

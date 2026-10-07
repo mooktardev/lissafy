@@ -7,6 +7,7 @@ import { AmountInput, Button, Chip, confirm, Field, Input, Row, Screen, Segmente
 import { Spacing } from '@/constants/theme';
 import { useCurrency, useTheme } from '@/hooks/use-theme';
 import { addDays, today } from '@/lib/dates';
+import { isSystemCategory } from '@/lib/defaults';
 import { amountToInput, parseAmount } from '@/lib/format';
 import { describeSchedule, FREQUENCY_LABELS } from '@/lib/recurring';
 import type { Frequency, ISODate, TransactionKind } from '@/lib/types';
@@ -33,7 +34,7 @@ export default function RecurringEdit() {
   const [note, setNote] = useState(existing?.note ?? '');
   const [active, setActive] = useState(existing?.active ?? true);
 
-  const available = categories.filter((c) => c.kind === kind);
+  const available = categories.filter((c) => c.kind === kind && (!isSystemCategory(c.id) || c.id === existing?.categoryId));
   const effectiveCategory = available.some((c) => c.id === categoryId) ? categoryId : null;
   const value = parseAmount(amount);
   const valid =

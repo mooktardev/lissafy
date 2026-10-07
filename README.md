@@ -14,6 +14,8 @@ Application mobile de planification financière personnelle, construite avec **E
 | **Outils** (icône en haut de l'accueil) | Situation nette, simulateur d'épargne (intérêts composés), dettes et prêts (échéancier, paiements, remboursement anticipé, stratégie avalanche), catégories, réglages                                                  |
 | **Récurrences** (Outils)                | Salaire, loyer, abonnements ajoutés automatiquement à chaque échéance (rattrapage inclus), charges et revenus fixes par mois, prochaines échéances sur l'accueil                                                       |
 
+**Objectifs et prêts reliés aux transactions :** un versement sur un objectif crée une dépense « Épargne », un retrait un revenu « Retrait d'épargne », un paiement de prêt une dépense « Remboursements ». Les deux restent synchronisés (suppression, date), et le taux d'épargne compte les versements comme de l'épargne.
+
 **Design :** police Plus Jakarta Sans, cartes en dégradé, ombres douces, thème clair et sombre soignés.
 
 **Réglages :** devise configurable (EUR, FCFA, MAD, CHF, CAD, USD… ou tout code ISO 4217), thème clair / sombre / système, export et import d'une sauvegarde JSON, remise à zéro.

@@ -5,7 +5,7 @@ import { ColorPicker, IconPicker } from '@/components/pickers';
 import { Button, CategoryIcon, confirm, Field, Input, notify, Row, Screen, Segmented, T } from '@/components/ui';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { CATEGORY_ICONS, PALETTE } from '@/lib/defaults';
+import { CATEGORY_ICONS, isSystemCategory, PALETTE } from '@/lib/defaults';
 import type { IconName, TransactionKind } from '@/lib/types';
 import { useStore } from '@/store';
 
@@ -78,7 +78,13 @@ export default function CategoryEdit() {
         <ColorPicker colors={PALETTE} value={color} onChange={setColor} />
       </Field>
       <Button title="Enregistrer" icon="checkmark" onPress={save} disabled={!valid} />
-      {existing ? <Button title="Supprimer" icon="trash-outline" variant="danger" onPress={remove} /> : null}
+      {existing && isSystemCategory(existing.id) ? (
+        <T variant="caption" tone="secondary" style={{ textAlign: 'center' }}>
+          Catégorie automatique, utilisée par les objectifs et les prêts : elle peut être renommée mais pas supprimée.
+        </T>
+      ) : existing ? (
+        <Button title="Supprimer" icon="trash-outline" variant="danger" onPress={remove} />
+      ) : null}
     </Screen>
   );
 }

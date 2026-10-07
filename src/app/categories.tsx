@@ -6,6 +6,7 @@ import { Pressable, View } from 'react-native';
 import { Card, CategoryIcon, Divider, Fab, Row, Screen, Segmented, T } from '@/components/ui';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { isSystemCategory } from '@/lib/defaults';
 import type { TransactionKind } from '@/lib/types';
 import { useStore } from '@/store';
 
@@ -43,6 +44,7 @@ export default function Categories() {
                     <T variant="bodyBold">{c.name}</T>
                     <T variant="caption" tone="secondary">
                       {counts.get(c.id) ?? 0} transaction{(counts.get(c.id) ?? 0) > 1 ? 's' : ''}
+                      {isSystemCategory(c.id) ? ' · automatique' : ''}
                     </T>
                   </View>
                   <Ionicons name="chevron-forward" size={18} color={theme.textSecondary} />

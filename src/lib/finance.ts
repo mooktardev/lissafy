@@ -13,7 +13,12 @@ export type MonthSummary = {
   income: number;
   expense: number;
   net: number;
-  /** Part des revenus épargnée (0–1), `null` sans revenus. */
+  /** Montant mis de côté sur les objectifs (versements − retraits). */
+  saved: number;
+  /**
+   * Part des revenus non consommée (0–1), `null` sans revenus. Les versements
+   * vers les objectifs comptent comme de l'épargne, pas comme des dépenses.
+   */
   savingsRate: number | null;
 };
 
@@ -23,10 +28,20 @@ export function transactionsOfMonth(transactions: Transaction[], month: MonthKey
 
 export function monthSummary(transactions: Transaction[], month: MonthKey): MonthSummary {
   const list = transactionsOfMonth(transactions, month);
-  const income = sum(list.filter((t) => t.kind === 'income').map((t) => t.amount));
-  const expense = sum(list.filter((t) => t.kind === 'expense').map((t) => t.amount));
-  const net = income - expense;
-  return { income, expense, net, savingsRate: income > 0 ? net / income : null };
+  const total = (pred: (t: Transaction) => boolean) => sum(list.filter(pred).map((t) => t.amount));
+  const income = total((t) => t.kind === 'income');
+  const expense = total((t) => t.kind === 'expense');
+  const deposits = total((t) => t.kind === 'expense' && t.link?.type === 'goal');
+  const withdrawals = total((t) => t.kind === 'income' && t.link?.type === 'goal');
+  const realIncome = income - withdrawals;
+  const consumption = expense - deposits;
+  return {
+    income,
+    expense,
+    net: income - expense,
+    saved: deposits - withdrawals,
+    savingsRate: realIncome > 0 ? (realIncome - consumption) / realIncome : null,
+  };
 }
 
 export function spendingByCategory(

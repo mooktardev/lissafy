@@ -8,6 +8,7 @@ import { Button, Card, Chip, confirm, Field, Input, Row, Screen, Segmented, T } 
 import { Fonts, Spacing } from '@/constants/theme';
 import { useCurrency, useTheme } from '@/hooks/use-theme';
 import { addDays, currentMonth, today } from '@/lib/dates';
+import { isSystemCategory } from '@/lib/defaults';
 import { amountToInput, parseAmount } from '@/lib/format';
 import { describeSchedule, FREQUENCY_LABELS } from '@/lib/recurring';
 import type { Frequency, ISODate, TransactionKind } from '@/lib/types';
@@ -26,6 +27,11 @@ export default function TransactionForm() {
   const applyRecurring = useStore((s) => s.applyRecurring);
   const rule = useStore((s) => s.recurrings.find((r) => r.id === existing?.recurringId));
   const month = useUi((s) => s.month);
+  const link = existing?.link;
+  const linkedGoal = useStore((s) => (link?.type === 'goal' ? s.goals.find((g) => g.id === link.goalId) : undefined));
+  const linkedDebt = useStore((s) => (link?.type === 'debt' ? s.debts.find((d) => d.id === link.debtId) : undefined));
+  // Le montant, le type et la catégorie d'une transaction liée se gèrent depuis l'objectif ou la dette.
+  const locked = link !== undefined;
 
   const [kind, setKind] = useState<TransactionKind>(existing?.kind ?? (params.kind === 'income' ? 'income' : 'expense'));
   const [amount, setAmount] = useState(amountToInput(existing?.amount ?? 0));
@@ -34,7 +40,10 @@ export default function TransactionForm() {
   const [note, setNote] = useState(existing?.note ?? '');
   const [repeat, setRepeat] = useState<Frequency | 'none'>('none');
 
-  const available = categories.filter((c) => c.kind === kind);
+  // Les catégories automatiques (Épargne, Remboursements…) ne se choisissent pas à la main.
+  const available = categories.filter(
+    (c) => c.kind === kind && (!isSystemCategory(c.id) || c.id === existing?.categoryId),
+  );
   const effectiveCategory = available.some((c) => c.id === categoryId) ? categoryId : null;
   const value = parseAmount(amount);
   const valid = Number.isFinite(value) && value > 0 && effectiveCategory !== null;
@@ -59,14 +68,19 @@ export default function TransactionForm() {
       // Rattrape les échéances déjà passées si la date de départ est ancienne.
       applyRecurring(today());
     } else {
-      saveTransaction({ ...base, id: existing?.id, date, recurringId: existing?.recurringId });
+      saveTransaction({ ...base, id: existing?.id, date, recurringId: existing?.recurringId, link });
     }
     router.back();
   };
 
   const remove = async () => {
     if (!existing) return;
-    if (await confirm('Supprimer la transaction ?', 'Cette action est définitive.')) {
+    const message = linkedGoal
+      ? `Le mouvement sera aussi retiré de l’objectif « ${linkedGoal.name} ».`
+      : linkedDebt
+        ? `Le paiement sera aussi retiré du prêt « ${linkedDebt.name} » (le capital restant remonte).`
+        : 'Cette action est définitive.';
+    if (await confirm('Supprimer la transaction ?', message)) {
       deleteTransaction(existing.id);
       router.back();
     }
@@ -75,14 +89,41 @@ export default function TransactionForm() {
   return (
     <Screen>
       <Stack.Screen options={{ title: existing ? 'Modifier' : 'Nouvelle transaction' }} />
-      <Segmented<TransactionKind>
-        value={kind}
-        onChange={setKind}
-        options={[
-          { value: 'expense', label: 'Dépense', color: theme.expense, icon: 'arrow-up' },
-          { value: 'income', label: 'Revenu', color: theme.income, icon: 'arrow-down' },
-        ]}
-      />
+      {locked ? (
+        <Card
+          onPress={() =>
+            linkedGoal
+              ? router.push({ pathname: '/goal/[id]', params: { id: linkedGoal.id } })
+              : linkedDebt
+                ? router.push({ pathname: '/debt/[id]', params: { id: linkedDebt.id } })
+                : undefined
+          }
+          style={{ backgroundColor: theme.primarySoft, boxShadow: 'none' }}>
+          <Row>
+            <Ionicons name={link?.type === 'goal' ? 'flag' : 'card'} size={18} color={theme.primary} />
+            <View style={{ flex: 1 }}>
+              <T variant="bodyBold" tone="primary">
+                {link?.type === 'goal'
+                  ? `${kind === 'expense' ? 'Versement vers' : 'Retrait de'} l’objectif « ${linkedGoal?.name ?? '?'} »`
+                  : `Paiement du prêt « ${linkedDebt?.name ?? '?'} »`}
+              </T>
+              <T variant="caption" tone="primary">
+                Le montant se modifie depuis {link?.type === 'goal' ? 'l’objectif' : 'le prêt'}. Date et note restent modifiables ici.
+              </T>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={theme.primary} />
+          </Row>
+        </Card>
+      ) : (
+        <Segmented<TransactionKind>
+          value={kind}
+          onChange={setKind}
+          options={[
+            { value: 'expense', label: 'Dépense', color: theme.expense, icon: 'arrow-up' },
+            { value: 'income', label: 'Revenu', color: theme.income, icon: 'arrow-down' },
+          ]}
+        />
+      )}
 
       <Card style={[styles.amountCard, { backgroundColor: `${accent}12`, boxShadow: 'none' }]}>
         <T variant="label" style={{ color: accent }}>
@@ -96,6 +137,7 @@ export default function TransactionForm() {
             keyboardType="decimal-pad"
             inputMode="decimal"
             autoFocus={!existing}
+            editable={!locked}
             style={[styles.amountInput, { color: accent }, Platform.OS === 'web' && webNoOutline]}
           />
         <T variant="caption" tone="secondary" style={{ fontFamily: Fonts.semibold }}>
@@ -103,9 +145,11 @@ export default function TransactionForm() {
         </T>
       </Card>
 
-      <Field label="Catégorie">
-        <CategoryGrid categories={available} value={effectiveCategory} onChange={setCategoryId} />
-      </Field>
+      {locked ? null : (
+        <Field label="Catégorie">
+          <CategoryGrid categories={available} value={effectiveCategory} onChange={setCategoryId} />
+        </Field>
+      )}
 
       <Field label="Date">
         <Row>

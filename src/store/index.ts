@@ -3,7 +3,7 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
 import { today } from "@/lib/dates";
-import { DEFAULT_CATEGORIES } from "@/lib/defaults";
+import { DEFAULT_CATEGORIES, SYSTEM_CATEGORIES, SYSTEM_CATEGORY_IDS } from "@/lib/defaults";
 import { debtBalance, monthlyInterest, round2 } from "@/lib/finance";
 import { newId } from "@/lib/format";
 import { dueOccurrences } from "@/lib/recurring";
@@ -32,7 +32,9 @@ export type AppData = {
 type Actions = {
   updateSettings: (patch: Partial<Settings>) => void;
 
+  /** Enregistre une transaction ; si elle est liée, la date et la note sont répercutées. */
   saveTransaction: (t: Omit<Transaction, "id"> & { id?: string }) => void;
+  /** Supprime une transaction et, si elle est liée, le mouvement d'objectif ou le paiement. */
   deleteTransaction: (id: string) => void;
 
   saveCategory: (c: Omit<Category, "id"> & { id?: string }) => void;
@@ -44,15 +46,32 @@ type Actions = {
   saveGoal: (
     g: Omit<Goal, "id" | "contributions" | "createdAt"> & { id?: string },
   ) => void;
+  /** Supprime l'objectif ; ses transactions restent, sans lien. */
   deleteGoal: (id: string) => void;
-  addContribution: (goalId: string, amount: number, date: ISODate) => void;
+  /**
+   * Versement (> 0) ou retrait (< 0). Avec `record`, crée aussi la transaction
+   * correspondante (dépense « Épargne » ou revenu « Retrait d'épargne »).
+   */
+  addContribution: (
+    goalId: string,
+    amount: number,
+    date: ISODate,
+    record?: boolean,
+  ) => void;
   deleteContribution: (goalId: string, contributionId: string) => void;
 
   saveDebt: (
     d: Omit<Debt, "id" | "payments" | "createdAt"> & { id?: string },
   ) => void;
+  /** Supprime la dette ; ses transactions restent, sans lien. */
   deleteDebt: (id: string) => void;
-  addDebtPayment: (debtId: string, amount: number, date: ISODate) => void;
+  /** Avec `record`, crée aussi la dépense « Remboursements » correspondante. */
+  addDebtPayment: (
+    debtId: string,
+    amount: number,
+    date: ISODate,
+    record?: boolean,
+  ) => void;
   deleteDebtPayment: (debtId: string, paymentId: string) => void;
 
   /** Crée ou modifie une récurrence (les échéances passées ne sont pas regénérées). */
@@ -82,6 +101,24 @@ export const initialData = (): AppData => ({
   debts: [],
   recurrings: [],
 });
+
+/** Ajoute les catégories système manquantes (données antérieures à leur création). */
+export function withSystemCategories(categories: Category[]): Category[] {
+  const missing = SYSTEM_CATEGORIES.filter(
+    (sc) => !categories.some((c) => c.id === sc.id),
+  );
+  return missing.length ? [...categories, ...missing] : categories;
+}
+
+/** Retire le lien des transactions dont l'objectif ou la dette a été supprimé. */
+function unlink(
+  transactions: Transaction[],
+  match: (link: NonNullable<Transaction["link"]>) => boolean,
+): Transaction[] {
+  return transactions.map((t) =>
+    t.link && match(t.link) ? { ...t, link: undefined } : t,
+  );
+}
 
 function upsert<T extends { id: string }>(list: T[], item: T): T[] {
   const i = list.findIndex((x) => x.id === item.id);
@@ -115,13 +152,75 @@ export const useStore = create<AppState>()(
         set((s) => ({ settings: { ...s.settings, ...patch } })),
 
       saveTransaction: ({ id, ...rest }) =>
-        set((s) => ({
-          transactions: upsert(s.transactions, { id: id ?? newId(), ...rest }),
-        })),
+        set((s) => {
+          const tx: Transaction = { id: id ?? newId(), ...rest };
+          const link = tx.link;
+          return {
+            transactions: upsert(s.transactions, tx),
+            // Une transaction liée garde le mouvement d'origine à la même date.
+            goals:
+              link?.type === "goal"
+                ? s.goals.map((g) =>
+                    g.id === link.goalId
+                      ? {
+                          ...g,
+                          contributions: g.contributions.map((c) =>
+                            c.id === link.contributionId
+                              ? { ...c, date: tx.date }
+                              : c,
+                          ),
+                        }
+                      : g,
+                  )
+                : s.goals,
+            debts:
+              link?.type === "debt"
+                ? s.debts.map((d) =>
+                    d.id === link.debtId
+                      ? {
+                          ...d,
+                          payments: d.payments.map((p) =>
+                            p.id === link.paymentId ? { ...p, date: tx.date } : p,
+                          ),
+                        }
+                      : d,
+                  )
+                : s.debts,
+          };
+        }),
       deleteTransaction: (id) =>
-        set((s) => ({
-          transactions: s.transactions.filter((t) => t.id !== id),
-        })),
+        set((s) => {
+          const link = s.transactions.find((t) => t.id === id)?.link;
+          return {
+            transactions: s.transactions.filter((t) => t.id !== id),
+            goals:
+              link?.type === "goal"
+                ? s.goals.map((g) =>
+                    g.id === link.goalId
+                      ? {
+                          ...g,
+                          contributions: g.contributions.filter(
+                            (c) => c.id !== link.contributionId,
+                          ),
+                        }
+                      : g,
+                  )
+                : s.goals,
+            debts:
+              link?.type === "debt"
+                ? s.debts.map((d) =>
+                    d.id === link.debtId
+                      ? {
+                          ...d,
+                          payments: d.payments.filter(
+                            (p) => p.id !== link.paymentId,
+                          ),
+                        }
+                      : d,
+                  )
+                : s.debts,
+          };
+        }),
 
       saveCategory: ({ id, ...rest }) =>
         set((s) => ({
@@ -156,17 +255,45 @@ export const useStore = create<AppState>()(
           return { goals: upsert(s.goals, goal) };
         }),
       deleteGoal: (id) =>
-        set((s) => ({ goals: s.goals.filter((g) => g.id !== id) })),
-      addContribution: (goalId, amount, date) =>
         set((s) => ({
-          goals: s.goals.map((g) => {
-            if (g.id !== goalId) return g;
-            const c: Contribution = { id: newId(), amount, date };
-            return { ...g, contributions: [...g.contributions, c] };
-          }),
+          goals: s.goals.filter((g) => g.id !== id),
+          transactions: unlink(s.transactions, (l) => l.type === "goal" && l.goalId === id),
         })),
+      addContribution: (goalId, amount, date, record = true) =>
+        set((s) => {
+          const goal = s.goals.find((g) => g.id === goalId);
+          if (!goal) return {};
+          const c: Contribution = { id: newId(), amount, date };
+          const tx: Transaction[] = record
+            ? [
+                {
+                  id: newId(),
+                  kind: amount >= 0 ? "expense" : "income",
+                  amount: Math.abs(amount),
+                  categoryId:
+                    amount >= 0
+                      ? SYSTEM_CATEGORY_IDS.savingsIn
+                      : SYSTEM_CATEGORY_IDS.savingsOut,
+                  date,
+                  note: goal.name,
+                  link: { type: "goal", goalId, contributionId: c.id },
+                },
+              ]
+            : [];
+          return {
+            categories: withSystemCategories(s.categories),
+            goals: s.goals.map((g) =>
+              g.id === goalId ? { ...g, contributions: [...g.contributions, c] } : g,
+            ),
+            transactions: [...s.transactions, ...tx],
+          };
+        }),
       deleteContribution: (goalId, contributionId) =>
         set((s) => ({
+          transactions: s.transactions.filter(
+            (t) =>
+              !(t.link?.type === "goal" && t.link.contributionId === contributionId),
+          ),
           goals: s.goals.map((g) =>
             g.id === goalId
               ? {
@@ -188,26 +315,49 @@ export const useStore = create<AppState>()(
           return { debts: upsert(s.debts, debt) };
         }),
       deleteDebt: (id) =>
-        set((s) => ({ debts: s.debts.filter((d) => d.id !== id) })),
-      addDebtPayment: (debtId, amount, date) =>
         set((s) => ({
-          debts: s.debts.map((d) => {
-            if (d.id !== debtId) return d;
-            const interest = Math.min(
-              amount,
-              monthlyInterest(debtBalance(d), d.annualRate),
-            );
-            return {
-              ...d,
-              payments: [
-                ...d.payments,
-                { id: newId(), amount: round2(amount), interest, date },
-              ],
-            };
-          }),
+          debts: s.debts.filter((d) => d.id !== id),
+          transactions: unlink(s.transactions, (l) => l.type === "debt" && l.debtId === id),
         })),
+      addDebtPayment: (debtId, amount, date, record = true) =>
+        set((s) => {
+          const debt = s.debts.find((d) => d.id === debtId);
+          if (!debt) return {};
+          const payment = {
+            id: newId(),
+            amount: round2(amount),
+            interest: Math.min(
+              amount,
+              monthlyInterest(debtBalance(debt), debt.annualRate),
+            ),
+            date,
+          };
+          const tx: Transaction[] = record
+            ? [
+                {
+                  id: newId(),
+                  kind: "expense",
+                  amount: payment.amount,
+                  categoryId: SYSTEM_CATEGORY_IDS.debt,
+                  date,
+                  note: debt.name,
+                  link: { type: "debt", debtId, paymentId: payment.id },
+                },
+              ]
+            : [];
+          return {
+            categories: withSystemCategories(s.categories),
+            debts: s.debts.map((d) =>
+              d.id === debtId ? { ...d, payments: [...d.payments, payment] } : d,
+            ),
+            transactions: [...s.transactions, ...tx],
+          };
+        }),
       deleteDebtPayment: (debtId, paymentId) =>
         set((s) => ({
+          transactions: s.transactions.filter(
+            (t) => !(t.link?.type === "debt" && t.link.paymentId === paymentId),
+          ),
           debts: s.debts.map((d) =>
             d.id === debtId
               ? { ...d, payments: d.payments.filter((p) => p.id !== paymentId) }
@@ -262,12 +412,23 @@ export const useStore = create<AppState>()(
           return { recurrings, transactions: [...s.transactions, ...created] };
         }),
 
-      importData: (data) => set({ ...initialData(), ...data }),
+      importData: (data) => {
+        const merged = { ...initialData(), ...data };
+        set({ ...merged, categories: withSystemCategories(merged.categories) });
+      },
       resetAll: () => set(initialData()),
     }),
     {
       name: "Lissafy-data",
-      version: 1,
+      version: 2,
+      // v2 : catégories système (Épargne, Remboursements, Retrait d'épargne).
+      migrate: (persisted, version) => {
+        const state = persisted as AppData;
+        if (version < 2 && Array.isArray(state?.categories)) {
+          return { ...state, categories: withSystemCategories(state.categories) };
+        }
+        return state;
+      },
       storage: createJSONStorage(() => storageWithLegacyFallback),
       partialize: ({
         settings,

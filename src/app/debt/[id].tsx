@@ -18,6 +18,7 @@ import {
   SectionHeader,
   StatTile,
   T,
+  ToggleRow,
 } from '@/components/ui';
 import { Spacing } from '@/constants/theme';
 import { useCurrency, useTheme } from '@/hooks/use-theme';
@@ -38,6 +39,7 @@ export default function DebtDetail() {
 
   const [amount, setAmount] = useState(amountToInput(debt?.monthlyPayment ?? 0));
   const [date, setDate] = useState<ISODate>(today());
+  const [record, setRecord] = useState(true);
   const [extra, setExtra] = useState('');
   const [showAll, setShowAll] = useState(false);
 
@@ -64,12 +66,12 @@ export default function DebtDetail() {
 
   const submit = () => {
     if (!valid) return;
-    addDebtPayment(debt.id, value, date);
+    addDebtPayment(debt.id, value, date, record);
     setAmount(amountToInput(Math.min(debt.monthlyPayment, maxPayment)));
   };
 
   const remove = async () => {
-    if (await confirm(`Supprimer « ${debt.name} » ?`, 'La dette et son historique seront supprimés.')) {
+    if (await confirm(`Supprimer « ${debt.name} » ?`, 'La dette et son historique seront supprimés. Les dépenses déjà enregistrées restent dans votre activité.')) {
       deleteDebt(debt.id);
       router.back();
     }
@@ -134,6 +136,16 @@ export default function DebtDetail() {
             <Field label="Date">
               <DateField value={date} onChange={(d) => d && setDate(d)} />
             </Field>
+            <ToggleRow
+              label="Enregistrer dans mes dépenses"
+              hint={
+                record
+                  ? 'Ajoute une dépense « Remboursements » à la date du paiement.'
+                  : 'Paiement enregistré uniquement sur la dette (déjà saisi ailleurs).'
+              }
+              value={record}
+              onChange={setRecord}
+            />
             <Button title="Enregistrer le paiement" icon="checkmark" onPress={submit} disabled={!valid} />
           </Card>
 
@@ -182,7 +194,7 @@ export default function DebtDetail() {
                     size={18}
                     color={theme.textSecondary}
                     onPress={async () => {
-                      if (await confirm('Supprimer ce paiement ?', `${money(p.amount)} le ${formatDate(p.date)}`)) {
+                      if (await confirm('Supprimer ce paiement ?', `${money(p.amount)} le ${formatDate(p.date)}. La dépense associée sera aussi supprimée.`)) {
                         deleteDebtPayment(debt.id, p.id);
                       }
                     }}

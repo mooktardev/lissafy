@@ -69,6 +69,22 @@ export const GOAL_ICONS: IconName[] = [
   'star',
 ];
 
+/** Catégories utilisées par les mouvements d'objectifs et les paiements de dettes. */
+export const SYSTEM_CATEGORY_IDS = {
+  savingsIn: 'sys-savings',
+  savingsOut: 'sys-savings-out',
+  debt: 'sys-debt',
+} as const;
+
+export const SYSTEM_CATEGORIES: Category[] = [
+  { id: SYSTEM_CATEGORY_IDS.savingsIn, name: 'Épargne', icon: 'wallet', color: '#0E9F6E', kind: 'expense' },
+  { id: SYSTEM_CATEGORY_IDS.debt, name: 'Remboursements', icon: 'card', color: '#E5484D', kind: 'expense' },
+  { id: SYSTEM_CATEGORY_IDS.savingsOut, name: "Retrait d'épargne", icon: 'wallet', color: '#0E9F6E', kind: 'income' },
+];
+
+export const isSystemCategory = (id: string) =>
+  (Object.values(SYSTEM_CATEGORY_IDS) as string[]).includes(id);
+
 export const DEFAULT_CATEGORIES: Category[] = [
   { id: 'exp-housing', name: 'Logement', icon: 'home', color: '#4F46E5', kind: 'expense' },
   { id: 'exp-food', name: 'Alimentation', icon: 'cart', color: '#10B981', kind: 'expense' },
@@ -85,4 +101,5 @@ export const DEFAULT_CATEGORIES: Category[] = [
   { id: 'inc-invest', name: 'Investissements', icon: 'trending-up', color: '#4F46E5', kind: 'income' },
   { id: 'inc-gift', name: 'Cadeaux', icon: 'gift', color: '#EC4899', kind: 'income' },
   { id: 'inc-other', name: 'Autres revenus', icon: 'cash', color: '#64748B', kind: 'income' },
+  ...SYSTEM_CATEGORIES,
 ];

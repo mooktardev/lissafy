@@ -5,6 +5,7 @@ import {
   Platform,
   Pressable,
   StyleSheet,
+  Switch,
   Text,
   TextInput,
   View,
@@ -458,6 +459,44 @@ export function Input({ style, suffix, icon, ...rest }: TextInputProps & { suffi
 
 export function AmountInput(props: Omit<TextInputProps, 'keyboardType'> & { suffix?: string }) {
   return <Input keyboardType="decimal-pad" inputMode="decimal" placeholder="0" {...props} />;
+}
+
+/** Ligne libellé + interrupteur. */
+export function ToggleRow({
+  label,
+  hint,
+  value,
+  onChange,
+}: {
+  label: string;
+  hint?: string;
+  value: boolean;
+  onChange: (v: boolean) => void;
+}) {
+  const theme = useTheme();
+  return (
+    // Toute la ligne est cliquable ; seul l'interrupteur est exposé aux lecteurs d'écran.
+    <Pressable accessible={false} onPress={() => onChange(!value)}>
+      <Row gap={Spacing.md}>
+        <View style={{ flex: 1, gap: 2 }}>
+          <T variant="bodyBold">{label}</T>
+          {hint ? (
+            <T variant="caption" tone="secondary" style={{ fontFamily: Fonts.regular }}>
+              {hint}
+            </T>
+          ) : null}
+        </View>
+        <Switch
+          accessibilityLabel={label}
+          value={value}
+          onValueChange={onChange}
+          trackColor={{ false: theme.cardMuted, true: theme.primary }}
+          thumbColor="#FFFFFF"
+          {...(Platform.OS === 'web' ? { activeThumbColor: '#FFFFFF' } : {})}
+        />
+      </Row>
+    </Pressable>
+  );
 }
 
 // ---------------------------------------------------------------------------
