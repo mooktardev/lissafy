@@ -80,13 +80,37 @@ Les couleurs (vert pomme `#34C924`, logo `#0B2A06`) sont définies en tête de `
 
 ## Construire l'application
 
-Avec [EAS Build](https://docs.expo.dev/build/introduction/) :
+Les builds se font dans le cloud avec [EAS Build](https://docs.expo.dev/build/introduction/) : pas besoin d'Android Studio ni de Xcode. Identifiant de l'application (iOS et Android) : `com.mooktardev.lissafy`. Il ne doit plus changer une fois l'app publiée.
 
-```bash
-npx eas-cli@latest build --platform android --profile preview
-```
+### Première fois
 
-Identifiant de l’application (iOS et Android) : `com.mooktardev.lissafy`. Il ne doit plus changer une fois l’app publiée.
+1. Créez un compte gratuit sur [expo.dev](https://expo.dev/signup).
+2. Connectez-vous et liez le projet (ajoute `extra.eas.projectId` dans `app.json`, à valider dans git) :
+
+   ```bash
+   npx eas-cli@latest login
+   npx eas-cli@latest init
+   ```
+
+### Profils (`eas.json`)
+
+| Commande | Profil | Résultat |
+| --- | --- | --- |
+| `npm run build:apk` | `preview` | **APK Android** à installer directement sur un téléphone ou à partager à des testeurs |
+| `npm run build:dev` | `development` | APK avec le menu de développement (`npx expo start` s'y connecte) ; nécessaire pour Face ID |
+| `npm run build:android` | `production` | **AAB** pour Google Play, numéro de version incrémenté automatiquement |
+| `npm run build:ios` | `production` | Build App Store (compte Apple Developer requis, 99 $/an) |
+| `npm run submit:android` | `production` | Envoi du dernier AAB sur la piste de test interne de Google Play |
+
+À la fin d'un build, EAS affiche un lien et un QR code : ouvrez-le sur le téléphone pour télécharger l'APK, puis autorisez l'installation depuis cette source.
+
+Les numéros de build (`versionCode` Android, `buildNumber` iOS) sont gérés par EAS (`appVersionSource: remote`) ; seule la version affichée (`version` dans `app.json`, ex. 1.0.0) est à changer à la main.
+
+### Publier sur Google Play
+
+1. Compte développeur Google Play (25 $, paiement unique) et création de l'application dans la Play Console.
+2. `npm run build:android`, puis téléversez l'AAB à la main la **première fois** (Google l'exige).
+3. Pour les versions suivantes : clé de compte de service Google ([guide](https://docs.expo.dev/submit/android/)), puis `npm run submit:android`.
 
 ## Pistes d'évolution
 
