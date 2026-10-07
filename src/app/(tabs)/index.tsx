@@ -210,7 +210,7 @@ export default function Dashboard() {
             color={theme.income}
             onPress={() => router.push({ pathname: '/transaction', params: { kind: 'income' } })}
           />
-          <QuickAction icon="flag" label="Objectif" color={theme.primary} onPress={() => router.push('/goal-edit')} />
+          <QuickAction icon="flag" label="Objectif" color={theme.primaryText} onPress={() => router.push('/goal-edit')} />
           <QuickAction icon="trending-up" label="Simuler" color="#D9822B" onPress={() => router.push('/simulator')} />
         </Row>
       </Card>

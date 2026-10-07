@@ -6,9 +6,13 @@ export const Colors = {
     border: '#E6E8F0',
     text: '#111428',
     textSecondary: '#6B7190',
-    primary: '#5B4CF0',
-    primarySoft: '#ECEAFE',
-    onPrimary: '#FFFFFF',
+    /** Vert pomme de la marque, pour les aplats (boutons, sélections). */
+    primary: '#34C924',
+    /** Vert foncé lisible pour le texte et les icônes sur fond clair (5,1:1). */
+    primaryText: '#1F7F13',
+    primarySoft: '#E4F8E0',
+    /** Texte sur aplat vert pomme (le blanc n'y atteint que 2,2:1). */
+    onPrimary: '#0B2A06',
     income: '#0E9F6E',
     incomeSoft: '#DDF6EC',
     expense: '#E5484D',
@@ -26,9 +30,10 @@ export const Colors = {
     border: '#262A40',
     text: '#F2F3FA',
     textSecondary: '#9196B3',
-    primary: '#8C80FF',
-    primarySoft: '#26224F',
-    onPrimary: '#FFFFFF',
+    primary: '#34C924',
+    primaryText: '#34C924',
+    primarySoft: '#16301A',
+    onPrimary: '#0B2A06',
     income: '#3DD598',
     incomeSoft: '#123327',
     expense: '#FF6B70',
@@ -44,7 +49,8 @@ export const Colors = {
 export type ThemeColors = { [K in keyof typeof Colors.light]: string };
 
 /** Dégradé de la carte principale (identique en clair et sombre). */
-export const HeroGradient = ['#7B5CFA', '#5B4CF0', '#3F3BD1'] as const;
+// Verts assez profonds pour que le texte blanc reste lisible.
+export const HeroGradient = ['#2BA81E', '#1F8A14', '#156A0D'] as const;
 
 export const Fonts = {
   regular: 'PlusJakartaSans_400Regular',

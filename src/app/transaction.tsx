@@ -100,7 +100,7 @@ export default function TransactionForm() {
           }
           style={{ backgroundColor: theme.primarySoft, boxShadow: 'none' }}>
           <Row>
-            <Ionicons name={link?.type === 'goal' ? 'flag' : 'card'} size={18} color={theme.primary} />
+            <Ionicons name={link?.type === 'goal' ? 'flag' : 'card'} size={18} color={theme.primaryText} />
             <View style={{ flex: 1 }}>
               <T variant="bodyBold" tone="primary">
                 {link?.type === 'goal'
@@ -111,7 +111,7 @@ export default function TransactionForm() {
                 Le montant se modifie depuis {link?.type === 'goal' ? 'l’objectif' : 'le prêt'}. Date et note restent modifiables ici.
               </T>
             </View>
-            <Ionicons name="chevron-forward" size={18} color={theme.primary} />
+            <Ionicons name="chevron-forward" size={18} color={theme.primaryText} />
           </Row>
         </Card>
       ) : (
@@ -165,7 +165,7 @@ export default function TransactionForm() {
             onPress={() => router.push({ pathname: '/recurring-edit', params: { id: rule.id } })}
             style={{ backgroundColor: theme.primarySoft, boxShadow: 'none' }}>
             <Row>
-              <Ionicons name="repeat" size={18} color={theme.primary} />
+              <Ionicons name="repeat" size={18} color={theme.primaryText} />
               <View style={{ flex: 1 }}>
                 <T variant="bodyBold" tone="primary">
                   Transaction récurrente
@@ -174,7 +174,7 @@ export default function TransactionForm() {
                   {describeSchedule(rule.frequency, rule.startDate)} · modifier ici ne change que cette échéance
                 </T>
               </View>
-              <Ionicons name="chevron-forward" size={18} color={theme.primary} />
+              <Ionicons name="chevron-forward" size={18} color={theme.primaryText} />
             </Row>
           </Card>
         ) : null

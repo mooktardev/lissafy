@@ -56,7 +56,7 @@ export function MonthSwitcher({
           hitSlop={8}
           onPress={() => onChange(currentMonth())}
           style={[styles.todayPill, { backgroundColor: onGradient ? 'rgba(255,255,255,0.16)' : theme.primarySoft }]}>
-          <Ionicons name="return-down-back" size={16} color={onGradient ? '#FFFFFF' : theme.primary} />
+          <Ionicons name="return-down-back" size={16} color={onGradient ? '#FFFFFF' : theme.primaryText} />
         </Pressable>
       ) : null}
     </Row>
@@ -145,7 +145,7 @@ export function DateField({
           <IconButton icon="chevron-back" label="Jour précédent" size={18} onPress={() => onChange(addDays(value, -1))} />
         ) : null}
         <Pressable style={styles.dateLabel} onPress={() => setOpen(true)}>
-          <Ionicons name="calendar" size={18} color={theme.primary} />
+          <Ionicons name="calendar" size={18} color={theme.primaryText} />
           <T tone={value ? 'default' : 'secondary'}>{value ? formatDate(value) : placeholder}</T>
         </Pressable>
         {value && !allowClear ? (

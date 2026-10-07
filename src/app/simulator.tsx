@@ -101,7 +101,7 @@ export default function Simulator() {
           labels={points.map((p) => `${p.year}a`)}
           series={[
             { values: points.map((p) => p.value), color: theme.income, fill: true },
-            { values: points.map((p) => p.contributed), color: theme.primary },
+            { values: points.map((p) => p.contributed), color: theme.textSecondary },
           ]}
           formatValue={(v) => money(v, true)}
         />
@@ -113,7 +113,7 @@ export default function Simulator() {
             </T>
           </Row>
           <Row gap={Spacing.xs}>
-            <View style={{ width: 12, height: 3, backgroundColor: theme.primary }} />
+            <View style={{ width: 12, height: 3, backgroundColor: theme.textSecondary }} />
             <T variant="caption" tone="secondary">
               Versements cumulés
             </T>

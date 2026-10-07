@@ -24,7 +24,8 @@ import { formatMoney } from '@/lib/format';
 import type { Goal } from '@/lib/types';
 import { useStore } from '@/store';
 
-const SAVINGS_GRADIENT = ['#22C55E', '#0E9F6E', '#0B7A5A'] as const;
+// Bleu océan : distinct de la carte de solde verte, texte blanc lisible.
+const SAVINGS_GRADIENT = ['#0284C7', '#0369A1', '#0C4A6E'] as const;
 
 function GoalCard({ goal }: { goal: Goal }) {
   const theme = useTheme();
@@ -89,6 +90,7 @@ function GoalCard({ goal }: { goal: Goal }) {
 }
 
 export default function Goals() {
+  const theme = useTheme();
   const currency = useCurrency();
   const goals = useStore((s) => s.goals);
 
@@ -115,7 +117,7 @@ export default function Goals() {
         </Card>
       ) : (
         <>
-          <GradientCard colors={SAVINGS_GRADIENT} style={{ gap: Spacing.md, boxShadow: '0px 4px 12px rgba(14, 159, 110, 0.22)' }}>
+          <GradientCard colors={SAVINGS_GRADIENT} style={{ gap: Spacing.md, boxShadow: '0px 4px 12px rgba(3, 105, 161, 0.22)' }}>
             <View>
               <T variant="caption" tone="inverse" style={{ opacity: 0.85 }}>
                 Épargné au total
@@ -155,7 +157,7 @@ export default function Goals() {
           ))}
 
           <Card onPress={() => router.push('/goal-edit')} style={styles.addCard}>
-            <CategoryIcon icon="add" color="#5B4CF0" size={32} />
+            <CategoryIcon icon="add" color={theme.primaryText} size={32} />
             <T variant="bodyBold" tone="primary">
               Nouvel objectif
             </T>

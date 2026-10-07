@@ -128,7 +128,7 @@ export default function Settings() {
                     <Ionicons
                       name="checkmark-circle"
                       size={22}
-                      color={theme.primary}
+                      color={theme.primaryText}
                     />
                   ) : null}
                 </Row>

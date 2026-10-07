@@ -131,8 +131,8 @@ export default function BudgetScreen() {
         ) : null}
         {totalBudget === 0 ? (
           <View style={[styles.tip, { backgroundColor: theme.primarySoft }]}>
-            <Ionicons name="bulb" size={18} color={theme.primary} />
-            <T variant="caption" style={{ flex: 1, color: theme.primary }}>
+            <Ionicons name="bulb" size={18} color={theme.primaryText} />
+            <T variant="caption" style={{ flex: 1, color: theme.primaryText }}>
               Touchez une catégorie pour fixer son plafond mensuel. Il s&apos;appliquera à tous les mois.
             </T>
           </View>
@@ -198,7 +198,7 @@ export default function BudgetScreen() {
                     ) : null}
                   </View>
                   <View style={[styles.addPill, { backgroundColor: theme.primarySoft }]}>
-                    <Ionicons name="add" size={16} color={theme.primary} />
+                    <Ionicons name="add" size={16} color={theme.primaryText} />
                     <T variant="caption" tone="primary" style={{ fontFamily: Fonts.bold }}>
                       Budget
                     </T>

@@ -32,7 +32,7 @@ function AddButton() {
           { backgroundColor: theme.primary, boxShadow: `0px 3px 8px ${theme.primary}4D`, borderColor: theme.tabBar },
           pressed && { transform: [{ scale: 0.94 }] },
         ]}>
-        <Ionicons name="add" size={28} color="#FFFFFF" />
+        <Ionicons name="add" size={28} color={theme.onPrimary} />
       </Pressable>
     </View>
   );
@@ -45,7 +45,7 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: theme.primary,
+        tabBarActiveTintColor: theme.primaryText,
         tabBarInactiveTintColor: theme.textSecondary,
         tabBarLabelStyle: { fontFamily: Fonts.semibold, fontSize: 11, lineHeight: 14, height: 14, flexShrink: 0 },
         tabBarStyle: {

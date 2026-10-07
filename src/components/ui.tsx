@@ -181,7 +181,7 @@ export function T({
   const color = {
     default: theme.text,
     secondary: theme.textSecondary,
-    primary: theme.primary,
+    primary: theme.primaryText,
     income: theme.income,
     expense: theme.expense,
     warning: theme.warning,
@@ -225,7 +225,7 @@ export function SectionHeader({ title, action, onAction }: { title: string; acti
 
 function TintedIcon({ name, size, tone }: { name: IconName; size: number; tone: 'primary' | 'secondary' }) {
   const theme = useTheme();
-  return <Ionicons name={name} size={size} color={tone === 'primary' ? theme.primary : theme.textSecondary} />;
+  return <Ionicons name={name} size={size} color={tone === 'primary' ? theme.primaryText : theme.textSecondary} />;
 }
 
 // ---------------------------------------------------------------------------
@@ -256,9 +256,9 @@ export function Button({
   }[variant];
   const fg = {
     primary: theme.onPrimary,
-    secondary: theme.primary,
+    secondary: theme.primaryText,
     danger: theme.expense,
-    ghost: theme.primary,
+    ghost: theme.primaryText,
   }[variant];
   return (
     <Pressable
@@ -306,7 +306,7 @@ export function IconButton({
         filled ? [styles.iconButtonFilled, { backgroundColor: theme.card, boxShadow: theme.shadow }] : styles.iconButton,
         pressed && { opacity: 0.6 },
       ]}>
-      <Ionicons name={icon} size={size} color={color ?? (filled ? theme.text : theme.primary)} />
+      <Ionicons name={icon} size={size} color={color ?? (filled ? theme.text : theme.primaryText)} />
     </Pressable>
   );
 }
@@ -371,6 +371,8 @@ export function Chip({
 }) {
   const theme = useTheme();
   const active = color ?? theme.primary;
+  // Blanc sur les couleurs sémantiques foncées, texte foncé sur le vert pomme.
+  const selectedText = color ? '#FFFFFF' : theme.onPrimary;
   return (
     <Pressable
       onPress={onPress}
@@ -381,8 +383,8 @@ export function Chip({
           : { backgroundColor: theme.card, boxShadow: theme.shadow },
         pressed && { opacity: 0.7 },
       ]}>
-      {icon ? <Ionicons name={icon} size={14} color={selected ? '#FFFFFF' : active} /> : null}
-      <Text style={[styles.chipText, { color: selected ? '#FFFFFF' : theme.text }]}>{label}</Text>
+      {icon ? <Ionicons name={icon} size={14} color={selected ? selectedText : color ?? theme.primaryText} /> : null}
+      <Text style={[styles.chipText, { color: selected ? selectedText : theme.text }]}>{label}</Text>
     </Pressable>
   );
 }
@@ -586,7 +588,7 @@ export function EmptyState({
   return (
     <View style={styles.empty}>
       <View style={[styles.emptyIcon, { backgroundColor: theme.primarySoft }]}>
-        <Ionicons name={icon} size={26} color={theme.primary} />
+        <Ionicons name={icon} size={26} color={theme.primaryText} />
       </View>
       <T variant="heading" style={{ textAlign: 'center' }}>
         {title}
@@ -614,7 +616,7 @@ export function StatTile({
 }) {
   const theme = useTheme();
   const iconColor =
-    tone === 'income' ? theme.income : tone === 'expense' ? theme.expense : tone === 'warning' ? theme.warning : theme.primary;
+    tone === 'income' ? theme.income : tone === 'expense' ? theme.expense : tone === 'warning' ? theme.warning : theme.primaryText;
   return (
     <Card style={{ flex: 1, gap: Spacing.sm, padding: Spacing.md }}>
       {icon ? (
@@ -690,7 +692,7 @@ const styles = StyleSheet.create({
   },
   gradientShadow: {
     borderRadius: Radius.xl,
-    boxShadow: '0px 4px 12px rgba(76, 60, 230, 0.22)',
+    boxShadow: '0px 4px 12px rgba(31, 138, 20, 0.25)',
   },
   gradientInner: {
     borderRadius: Radius.xl,

@@ -84,7 +84,7 @@ export default function RootLayout() {
           headerBackButtonDisplayMode: 'minimal',
           headerShadowVisible: false,
           headerStyle: { backgroundColor: theme.background },
-          headerTintColor: theme.primary,
+          headerTintColor: theme.primaryText,
           headerTitleStyle: { fontFamily: Fonts.bold, fontSize: 16, color: theme.text },
           contentStyle: { backgroundColor: theme.background },
         }}>

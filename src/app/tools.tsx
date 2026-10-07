@@ -59,7 +59,7 @@ export default function Tools() {
       <SectionHeader title="Planification" />
       <ToolCard
         icon="repeat"
-        color="#5B4CF0"
+        color="#34C924"
         title="Récurrences"
         subtitle={
           recurringCount
